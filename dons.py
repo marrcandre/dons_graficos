@@ -19,7 +19,7 @@ for index, row in df.iterrows():
     fig, ax = plt.subplots()
 
     # Criar o mapa de cores
-    palette = sns.color_palette("Blues_r", len(values_sorted))
+    palette = sns.color_palette("Greens_r", len(values_sorted))
 
     # Atribuir uma cor a cada barra com base no seu valor
     colors = [palette[i] for i in range(len(values_sorted))]
