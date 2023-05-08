@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import seaborn as sns
 
 # Ler o arquivo CSV
 df = pd.read_csv("dons.csv", index_col=0)
@@ -18,12 +19,11 @@ for index, row in df.iterrows():
     fig, ax = plt.subplots()
 
     # Criar o mapa de cores
-    color_map = plt.cm.get_cmap('Greens')
-    norm = plt.Normalize(vmin=0, vmax=max(values_sorted.values))
-    
+    palette = sns.color_palette("Blues_r", len(values_sorted))
+
     # Atribuir uma cor a cada barra com base no seu valor
-    colors = [color_map(norm(value)) for value in values_sorted.values]
-    ax.bar(values_sorted.index, values_sorted.values, color=colors)    
+    colors = [palette[i] for i in range(len(values_sorted))]
+    ax.bar(values_sorted.index, values_sorted.values, color=colors)
 
     ax.set_ylim((0, 15))  # define o limite máximo de cada gráfico
 

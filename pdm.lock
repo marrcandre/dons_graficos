@@ -97,6 +97,17 @@ version = "2023.3"
 summary = "World timezone definitions, modern and historical"
 
 [[package]]
+name = "seaborn"
+version = "0.12.2"
+requires_python = ">=3.7"
+summary = "Statistical data visualization"
+dependencies = [
+    "matplotlib!=3.6.1,>=3.1",
+    "numpy!=1.24.0,>=1.17",
+    "pandas>=0.25",
+]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
@@ -111,7 +122,7 @@ summary = "Provider of IANA time zone data"
 [metadata]
 lock_version = "4.2"
 groups = ["default"]
-content_hash = "sha256:d2707c3695d3fdb2013c08cac9cfc651e61f3a793db3798d90539fc5e9efbd17"
+content_hash = "sha256:17d68d50966a28ba246520a61ed4f8a725b0727e3c93e3fa8bc720709d0c945f"
 
 [metadata.files]
 "contourpy 1.0.7" = [
@@ -432,6 +443,10 @@ content_hash = "sha256:d2707c3695d3fdb2013c08cac9cfc651e61f3a793db3798d90539fc5e
 "pytz 2023.3" = [
     {url = "https://files.pythonhosted.org/packages/5e/32/12032aa8c673ee16707a9b6cdda2b09c0089131f35af55d443b6a9c69c1d/pytz-2023.3.tar.gz", hash = "sha256:1d8ce29db189191fb55338ee6d0387d82ab59f3d00eac103412d64e0ebd0c588"},
     {url = "https://files.pythonhosted.org/packages/7f/99/ad6bd37e748257dd70d6f85d916cafe79c0b0f5e2e95b11f7fbc82bf3110/pytz-2023.3-py2.py3-none-any.whl", hash = "sha256:a151b3abb88eda1d4e34a9814df37de2a80e301e68ba0fd856fb9b46bfbbbffb"},
+]
+"seaborn 0.12.2" = [
+    {url = "https://files.pythonhosted.org/packages/8a/77/5cde8bc47df770486acf64f550839b4136d1696e5e4d57ce33fa1823972b/seaborn-0.12.2.tar.gz", hash = "sha256:374645f36509d0dcab895cba5b47daf0586f77bfe3b36c97c607db7da5be0139"},
+    {url = "https://files.pythonhosted.org/packages/8f/2e/17bbb83fbf102687bb2aa3d808add39da820a7698159302a1a69bb82e01c/seaborn-0.12.2-py3-none-any.whl", hash = "sha256:ebf15355a4dba46037dfd65b7350f014ceb1f13c05e814eda2c9f5fd731afc08"},
 ]
 "six 1.16.0" = [
     {url = "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
