@@ -1,0 +1,15 @@
+[tool.pdm]
+
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Marco André Mendes", email = "marcoandre@gmail.com"},
+]
+dependencies = [
+    "matplotlib>=3.7.1",
+    "pandas>=2.0.1",
+]
+requires-python = ">=3.10"
+license = {text = "MIT"}
