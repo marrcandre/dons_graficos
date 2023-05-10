@@ -38,12 +38,12 @@ for index, row in df.iterrows():
 
     # Melhorar a legibilidade dos rótulos do eixo x
     labels = [label.replace(" ", "\n") for label in values_sorted.index]
-    # ax.set_xticklabels(labels, rotation=90, fontsize=8, wrap=True)
+    # ax.set_xticklabels(labels, rotation=90, fontsize=9)
     # labels = ['\n'.join(label.split()) for label in values_sorted.index]
-    plt.xticks(range(len(values_sorted.index)), labels, rotation=90, fontsize=8)
+    plt.xticks(range(len(values_sorted.index)), labels, rotation=90)
 
     # Ajustar a posição dos rótulos do eixo x
-    plt.subplots_adjust(bottom=0.2)
+    plt.subplots_adjust(bottom=0.20)
 
     # Mostrar o gráfico
     plt.show()
