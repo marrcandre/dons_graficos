@@ -45,11 +45,15 @@ for index, row in df.iterrows():
     # Ajustar a posição dos rótulos do eixo x
     plt.subplots_adjust(bottom=0.20)
 
+    mng = plt.get_current_fig_manager()
+    mng.full_screen_toggle()
+
     # Mostrar o gráfico
-    plt.show()
+    plt.show(block=False) # Mostrar o gráfico sem bloquear o código
+    plt.close(fig) # Fechar todas as figuras
 
     # Salvar o gráfico
-    fig.savefig(f"figs/{index}.png", dpi=300)
+    fig.savefig(f"figs/{index.strip()}.png", dpi=300)
 
     # # Fechar a figura atual para liberar memória
     # plt.close(fig)
