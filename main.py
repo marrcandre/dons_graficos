@@ -1,59 +1,42 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-import seaborn as sns
+import numpy as np
 
-# Ler o arquivo CSV
-df = pd.read_csv("dons.csv", index_col=0)
+def generate_bar_chart(df):
+    # Extract the person's name and gift values
+    name = df.iloc[0, 0]
+    gifts = df.iloc[0, 1:]
 
-# Cria a pasta "figs" se não existir
-if not os.path.exists("figs"):
-    os.makedirs("figs")
+    # Sort the gift values in descending order
+    gifts = gifts.sort_values(ascending=True)
 
-# Loop para gerar um gráfico de barras para cada linha
-for index, row in df.iterrows():
-    # Ordenar os valores em ordem descendente
-    values_sorted = row.sort_values(ascending=False)
+    # Create a color gradient (from light green to dark green)
+    colors = plt.cm.Greens(np.linspace(0.2, 1, len(gifts)))
 
-    # Gerar o gráfico de barras
-    fig, ax = plt.subplots()
+    # Create the bar chart
+    plt.figure(figsize=(10, 6))
+    plt.barh(gifts.index, gifts, color=colors)
 
-    # Criar o mapa de cores
-    palette = sns.color_palette("Greens_r", len(values_sorted))
+    # Add title
+    plt.title(f"Gráfico dos Dons Espirituais para {name}")
 
-    # Atribuir uma cor a cada barra com base no seu valor
-    colors = [palette[i] for i in range(len(values_sorted))]
-    ax.bar(values_sorted.index, values_sorted.values, color=colors)
+    # Display the value on each bar
+    for i, v in enumerate(gifts):
+        plt.text(v + 0.2, i, str(v), va="center")
 
-    ax.set_ylim((0, 15))  # define o limite máximo de cada gráfico
+    # Create the "figs" directory if it does not exist
+    if not os.path.exists("figs"):
+        os.makedirs("figs")
 
-    # Adicionar o valor no topo de cada barra
-    for i, v in enumerate(values_sorted.values):
-        ax.text(i, v, str(v), ha="center", va="bottom")
+    # Save the chart as a PNG file
+    plt.tight_layout()
+    plt.savefig(f"figs/{name}.png", dpi=300)
 
-    # Definir título e rótulos dos eixos
-    ax.set_title(f"Gráfico dos Dons Espirituais: {index}")
-    # ax.set_xlabel('Domínios')
-    # ax.set_ylabel('Quantidade')
+if __name__ == "__main__":
+    # Read the CSV file
+    df = pd.read_csv("dons.csv")
 
-    # Melhorar a legibilidade dos rótulos do eixo x
-    labels = [label.replace(" ", "\n") for label in values_sorted.index]
-    # ax.set_xticklabels(labels, rotation=90, fontsize=9)
-    # labels = ['\n'.join(label.split()) for label in values_sorted.index]
-    plt.xticks(range(len(values_sorted.index)), labels, rotation=90)
-
-    # Ajustar a posição dos rótulos do eixo x
-    plt.subplots_adjust(bottom=0.20)
-
-    mng = plt.get_current_fig_manager()
-    mng.full_screen_toggle()
-
-    # Mostrar o gráfico
-    plt.show(block=False) # Mostrar o gráfico sem bloquear o código
-    plt.close(fig) # Fechar todas as figuras
-
-    # Salvar o gráfico
-    fig.savefig(f"figs/{index.strip()}.png", dpi=300)
-
-    # # Fechar a figura atual para liberar memória
-    # plt.close(fig)
+    # Generate a bar chart for each row
+    for line in df.iterrows():
+        generate_bar_chart(pd.DataFrame([line[1]]))
