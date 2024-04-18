@@ -31,7 +31,8 @@ def generate_bar_chart(df):
 
     # Save the chart as a PNG file
     plt.tight_layout()
-    plt.savefig(f"figs/{name}.png", dpi=300)
+    output_path = os.path.join("figs", f"{name}.png")
+    plt.savefig(output_path, dpi=300)
 
 if __name__ == "__main__":
     # Read the CSV file
