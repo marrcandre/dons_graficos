@@ -11,8 +11,14 @@ def generate_bar_chart(df):
     # Sort the gift values in descending order
     gifts = gifts.sort_values(ascending=True)
 
+    # Sort de gifts by name in ascending order
+    # gifts = gifts.sort_index(ascending=False)
+
     # Create a color gradient (from light green to dark green)
     colors = plt.cm.Greens(np.linspace(0.2, 1, len(gifts)))
+
+    # Use dark green color
+    # colors = "darkgreen"
 
     # Create the bar chart
     plt.figure(figsize=(10, 6))
