@@ -1,3 +1,8 @@
+
+# Teste: Descubra Seus Dons Espirituais
+
+Esse projeto se baseia nos dados gerados a partir desse teste: https://tinyurl.com/25z3ta8j
+
 # Análise de Dons Espirituais
 
 Este projeto tem como objetivo realizar uma análise estatística dos dons espirituais presentes em uma comunidade cristã. Para isso, foram coletados dados de membros dessa comunidade, atribuindo notas de 0 a 15 para cada um dos dons.
