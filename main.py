@@ -1,11 +1,12 @@
 import os
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
-import numpy as np
 
 # Create the "figs" directory once
 os.makedirs("figs", exist_ok=True)
+
 
 def generate_bar_chart(person_data):
     name = person_data.iloc[0]
@@ -60,6 +61,7 @@ def generate_bar_chart(person_data):
     output_path = os.path.join("figs", f"{name}.png")
     plt.savefig(output_path, dpi=300)
     plt.close(fig)
+
 
 if __name__ == "__main__":
     df = pd.read_csv("dons.csv")
