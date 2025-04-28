@@ -1,49 +1,68 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
+import seaborn as sns
 import numpy as np
 
-def generate_bar_chart(df):
-    # Extract the person's name and gift values
-    name = df.iloc[0, 0]
-    gifts = df.iloc[0, 1:]
+# Create the "figs" directory once
+os.makedirs("figs", exist_ok=True)
 
-    # Sort the gift values in descending order
-    gifts = gifts.sort_values(ascending=True)
+def generate_bar_chart(person_data):
+    name = person_data.iloc[0]
+    gifts = person_data.iloc[1:].sort_values(ascending=False)
 
-    # Sort de gifts by name in ascending order
-    # gifts = gifts.sort_index(ascending=False)
+    # Tema com grade branca
+    sns.set_theme(style="whitegrid")  # Estilo que inclui as linhas de grade horizontais
 
-    # Create a color gradient (from light green to dark green)
-    colors = plt.cm.Greens(np.linspace(0.2, 1, len(gifts)))
+    gifts_df = pd.DataFrame({
+        'gift': gifts.index,
+        'score': gifts.values
+    })
 
-    # Use dark green color
-    # colors = "darkgreen"
+    # Normalizar scores para 0.2 a 1.0
+    min_score = gifts_df['score'].min()
+    max_score = gifts_df['score'].max()
+    norm_scores = (gifts_df['score'] - min_score) / (max_score - min_score)
 
-    # Create the bar chart
-    plt.figure(figsize=(10, 6))
-    plt.barh(gifts.index, gifts, color=colors)
+    # Criar colormap manual
+    cmap = sns.color_palette("Greens", as_cmap=True)
+    colors = [cmap(0.2 + 0.8 * x) for x in norm_scores]
 
-    # Add title
-    plt.title(f"Gráfico dos Dons Espirituais para {name}")
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Display the value on each bar
-    for i, v in enumerate(gifts):
-        plt.text(v + 0.2, i, str(v), va="center")
+    # Criar barras
+    for i, (index, row) in enumerate(gifts_df.iterrows()):
+        ax.barh(
+            y=row['gift'],
+            width=row['score'],
+            color=colors[i]
+        )
+        ax.text(row['score'] + 0.3, i, str(row['score']), va='center', fontsize=9)
 
-    # Create the "figs" directory if it does not exist
-    if not os.path.exists("figs"):
-        os.makedirs("figs")
+    ax.set_title(f"Dons Espirituais de {name}", fontsize=16)
 
-    # Save the chart as a PNG file
+    # Remover título dos eixos
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+
+    # Retirar linhas de grade
+    ax.xaxis.grid(False)  # Linhas de grade verticais invisíveis
+    ax.yaxis.grid(False)  # Linhas de grade horizontais visíveis
+
+    # Remover eixo X (baixo)
+    ax.get_xaxis().set_visible(False)
+
+    # Inverter Y para maiores em cima
+    ax.invert_yaxis()
+
     plt.tight_layout()
+
     output_path = os.path.join("figs", f"{name}.png")
     plt.savefig(output_path, dpi=300)
+    plt.close(fig)
 
 if __name__ == "__main__":
-    # Read the CSV file
     df = pd.read_csv("dons.csv")
 
-    # Generate a bar chart for each row
-    for line in df.iterrows():
-        generate_bar_chart(pd.DataFrame([line[1]]))
+    for _, row in df.iterrows():
+        generate_bar_chart(row)
