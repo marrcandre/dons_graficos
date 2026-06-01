@@ -1,0 +1,13 @@
+{
+  "name": "dons-espirituais",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "npm run dev --workspace=packages/frontend",
+    "build": "npm run build --workspace=packages/frontend",
+    "preview": "npm run preview --workspace=packages/frontend"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

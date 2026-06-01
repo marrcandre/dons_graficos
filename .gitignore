@@ -1,5 +1,16 @@
 figs/
 
+# Env files
+.env
+.env.local
+.env.*.local
+packages/frontend/.env
+packages/functions/.env
+
+# Node
+node_modules/
+dist/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
