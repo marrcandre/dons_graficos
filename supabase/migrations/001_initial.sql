@@ -91,5 +91,8 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
 
 -- ============================================================
 -- Realtime: habilitar para responses (para AiAnalysis.vue)
+-- REPLICA IDENTITY FULL é necessário para payload.new conter
+-- todos os campos no evento UPDATE (não só a PK)
 -- ============================================================
+ALTER TABLE responses REPLICA IDENTITY FULL;
 ALTER PUBLICATION supabase_realtime ADD TABLE responses;

@@ -42,11 +42,34 @@ const text = ref(props.initialText)
 const loading = ref(!props.initialText)
 
 let subscription = null
+let pollInterval = null
+let pollAttempts = 0
+const MAX_POLL_ATTEMPTS = 24 // ~2 minutos a cada 5s
+
+async function pollForAnalysis() {
+  pollAttempts++
+  const { data } = await supabase
+    .from('responses')
+    .select('ai_analysis')
+    .eq('id', props.responseId)
+    .single()
+
+  if (data?.ai_analysis) {
+    text.value = data.ai_analysis
+    loading.value = false
+    clearInterval(pollInterval)
+    subscription?.unsubscribe()
+  } else if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+    loading.value = false // exibe mensagem de "em breve"
+    clearInterval(pollInterval)
+  }
+}
 
 onMounted(() => {
-  if (text.value) return // já tem análise
+  if (text.value) return
 
-  // Escutar mudanças via Realtime
+  // Realtime — evento imediato quando ai_analysis é preenchido
+  // Requer REPLICA IDENTITY FULL na tabela responses
   subscription = supabase
     .channel(`response-ai-${props.responseId}`)
     .on(
@@ -61,13 +84,20 @@ onMounted(() => {
         if (payload.new?.ai_analysis) {
           text.value = payload.new.ai_analysis
           loading.value = false
+          clearInterval(pollInterval)
         }
       }
     )
     .subscribe()
+
+  // Polling de fallback a cada 5s (cobre casos onde Realtime falha
+  // ou REPLICA IDENTITY FULL ainda não foi aplicado)
+  pollForAnalysis() // checar imediatamente (função pode já ter terminado)
+  pollInterval = setInterval(pollForAnalysis, 5000)
 })
 
 onUnmounted(() => {
   subscription?.unsubscribe()
+  clearInterval(pollInterval)
 })
 </script>
