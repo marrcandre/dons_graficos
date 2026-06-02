@@ -29,35 +29,24 @@
       </p>
     </v-card>
 
-    <!-- Como responder -->
-    <v-card rounded="xl" class="mb-6 pa-6" elevation="1">
-      <h2 class="text-h6 font-weight-bold text-primary mb-4">Como responder</h2>
-      <v-list lines="two">
-        <v-list-item
+    <!-- Como responder + Reflexão (card único compacto) -->
+    <v-card rounded="xl" class="mb-6 pa-4" elevation="1">
+      <p class="text-caption font-weight-bold text-primary text-uppercase mb-2">Escala de respostas:</p>
+      <div class="d-flex flex-wrap" style="gap: 6px 8px; margin-bottom: 12px">
+        <v-chip
           v-for="(opt, i) in ANSWER_LABELS"
           :key="i"
+          size="small"
+          variant="tonal"
+          color="primary"
           :prepend-icon="['mdi-numeric-0-circle-outline','mdi-numeric-1-circle-outline','mdi-numeric-2-circle-outline','mdi-numeric-3-circle-outline'][i]"
-        >
-          <template #title>
-            <span class="font-weight-medium">{{ opt.label }}</span>
-          </template>
-        </v-list-item>
-      </v-list>
-    </v-card>
-
-    <!-- Perguntas de reflexão pré-quiz -->
-    <v-card rounded="xl" class="mb-8 pa-6" elevation="1">
-      <h2 class="text-h6 font-weight-bold text-primary mb-4">Antes de começar, reflita:</h2>
-      <v-list>
-        <v-list-item
-          v-for="(q, i) in reflectionQuestions"
-          :key="i"
-          :prepend-icon="'mdi-help-circle-outline'"
-          class="text-body-2"
-        >
-          {{ q }}
-        </v-list-item>
-      </v-list>
+        >{{ opt.label }}</v-chip>
+      </div>
+      <v-divider class="mb-3" />
+      <p class="text-caption font-weight-bold text-primary text-uppercase mb-2">Antes de começar, reflita:</p>
+      <ul class="text-body-2 text-medium-emphasis pl-4" style="line-height: 1.8">
+        <li v-for="(q, i) in reflectionQuestions" :key="i">{{ q }}</li>
+      </ul>
     </v-card>
 
     <!-- Acesso rápido ao histórico -->
