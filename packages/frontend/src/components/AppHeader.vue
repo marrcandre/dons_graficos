@@ -1,7 +1,7 @@
 <template>
   <v-app-bar color="primary" elevation="2">
     <v-app-bar-title>
-      <span class="font-weight-bold text-white">Dons Espirituais</span>
+      <router-link to="/" class="font-weight-bold text-white text-decoration-none">Dons Espirituais</router-link>
     </v-app-bar-title>
 
     <template #append>
