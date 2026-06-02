@@ -21,6 +21,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/meus-resultados',
+    name: 'my-results',
+    component: () => import('../views/MyResultsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/results/:id',
     name: 'results',
     component: () => import('../views/ResultsView.vue'),

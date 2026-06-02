@@ -14,6 +14,13 @@
         title="Painel Admin"
       />
       <v-btn
+        icon="mdi-history"
+        color="white"
+        variant="text"
+        to="/meus-resultados"
+        title="Meus resultados"
+      />
+      <v-btn
         icon="mdi-home"
         color="white"
         variant="text"

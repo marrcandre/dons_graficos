@@ -60,6 +60,23 @@
       </v-list>
     </v-card>
 
+    <!-- Acesso rápido ao histórico -->
+    <v-card
+      v-if="hasHistory"
+      rounded="xl"
+      variant="outlined"
+      color="primary"
+      class="mb-6 pa-4 d-flex align-center justify-space-between"
+    >
+      <div>
+        <p class="text-body-2 font-weight-medium text-primary mb-0">Você já fez testes anteriores</p>
+        <p class="text-caption text-medium-emphasis mb-0">Veja seus resultados e análises anteriores</p>
+      </div>
+      <v-btn variant="tonal" color="primary" rounded="lg" size="small" to="/meus-resultados">
+        Ver histórico
+      </v-btn>
+    </v-card>
+
     <!-- Botão -->
     <div class="text-center">
       <v-btn
@@ -80,10 +97,22 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { ANSWER_LABELS } from '../data/questions.js'
+import { supabase } from '../services/supabase.js'
 
 const authStore = useAuthStore()
+
+const hasHistory = ref(false)
+
+onMounted(async () => {
+  const { count } = await supabase
+    .from('responses')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', authStore.user?.id)
+  hasHistory.value = (count ?? 0) > 0
+})
 
 const reflectionQuestions = [
   'Quais atividades no ministério ou serviço mais te energizam?',
