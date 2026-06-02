@@ -4,26 +4,22 @@
       {{ question.text }}
     </p>
 
-    <v-btn-toggle
-      :model-value="modelValue"
-      @update:model-value="$emit('update:modelValue', $event)"
-      color="primary"
-      variant="outlined"
-      divided
-      rounded="xl"
-      class="flex-wrap w-100 mb-6"
-      mandatory
-    >
+    <div class="d-flex flex-column gap-2 mb-6">
       <v-btn
         v-for="opt in ANSWER_LABELS"
         :key="opt.value"
-        :value="opt.value"
-        class="flex-1-1"
-        style="min-width: 140px; height: 56px"
+        :color="modelValue === opt.value ? 'primary' : undefined"
+        :variant="modelValue === opt.value ? 'flat' : 'outlined'"
+        :prepend-icon="modelValue === opt.value ? 'mdi-check-circle' : 'mdi-circle-outline'"
+        rounded="lg"
+        size="large"
+        class="justify-start text-body-2 font-weight-regular"
+        style="width: 100%; height: 52px"
+        @click="$emit('update:modelValue', opt.value)"
       >
         {{ opt.label }}
       </v-btn>
-    </v-btn-toggle>
+    </div>
 
     <div class="d-flex justify-space-between gap-2">
       <v-btn

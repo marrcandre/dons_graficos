@@ -104,12 +104,12 @@ async function loadResponse() {
   loading.value = true
   error.value = null
   try {
-    const { data, err } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('responses')
       .select('*')
       .eq('id', route.params.id)
       .single()
-    if (err) throw err
+    if (fetchError) throw fetchError
     response.value = data
   } catch {
     error.value = 'Resultado não encontrado.'
