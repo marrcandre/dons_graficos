@@ -23,8 +23,15 @@
       <v-menu>
         <template #activator="{ props }">
           <v-btn icon v-bind="props" variant="text">
-            <v-avatar size="32" :image="authStore.user?.user_metadata?.avatar_url" color="secondary">
-              <span v-if="!authStore.user?.user_metadata?.avatar_url" class="text-caption font-weight-bold">
+            <v-avatar size="32" color="secondary">
+              <img
+                v-if="avatarUrl && !avatarError"
+                :src="avatarUrl"
+                :alt="initials"
+                style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+                @error="avatarError = true"
+              />
+              <span v-else class="text-caption font-weight-bold text-white">
                 {{ initials }}
               </span>
             </v-avatar>
@@ -49,13 +56,26 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 
 const authStore = useAuthStore()
 
+const avatarError = ref(false)
+
+// Supabase pode guardar a foto do Google como avatar_url ou picture
+const avatarUrl = computed(() =>
+  authStore.user?.user_metadata?.avatar_url ||
+  authStore.user?.user_metadata?.picture ||
+  authStore.profile?.photo_url ||
+  null
+)
+
+// Resetar erro ao trocar de usuário
+watch(avatarUrl, () => { avatarError.value = false })
+
 const initials = computed(() => {
-  const name = authStore.user?.user_metadata?.full_name || ''
+  const name = authStore.user?.user_metadata?.full_name || authStore.profile?.name || ''
   return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
 })
 </script>
