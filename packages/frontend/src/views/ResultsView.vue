@@ -22,7 +22,7 @@
       <GiftBadges :scores="response.scores" class="mb-6" />
 
       <!-- Gráfico -->
-      <ResultsChart :scores="response.scores" class="mb-6" />
+      <ResultsChart ref="chartRef" :scores="response.scores" class="mb-6" />
 
       <!-- Análise IA -->
       <AiAnalysis :response-id="response.id" :initial-text="response.ai_analysis" class="mb-6" />
@@ -95,6 +95,7 @@ const loading = ref(true)
 const error = ref(null)
 const response = ref(null)
 const exportingPDF = ref(false)
+const chartRef = ref(null)
 
 const isOwner = computed(() =>
   authStore.user && response.value?.user_id === authStore.user.id
@@ -127,33 +128,79 @@ function formatDate(iso) {
 async function exportPDF() {
   exportingPDF.value = true
   try {
-    const { default: jsPDF } = await import('jspdf')
-    const { default: html2canvas } = await import('html2canvas')
-
-    const element = document.querySelector('.v-container')
-    const canvas = await html2canvas(element, { scale: 1.5, useCORS: true })
-    const imgData = canvas.toDataURL('image/png')
+    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+      import('jspdf'),
+      import('html2canvas'),
+    ])
 
     const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' })
-    const pageWidth = pdf.internal.pageSize.getWidth()
-    const pageHeight = pdf.internal.pageSize.getHeight()
-    const ratio = canvas.height / canvas.width
-    const imgHeight = pageWidth * ratio
+    const W = pdf.internal.pageSize.getWidth()   // 210mm
+    const H = pdf.internal.pageSize.getHeight()  // 297mm
+    const margin = 16
+    const contentW = W - margin * 2
 
-    let heightLeft = imgHeight
-    let position = 0
+    // ── Página 1: cabeçalho + gráfico ──────────────────────────────
+    // Faixa verde no topo
+    pdf.setFillColor(27, 84, 56)
+    pdf.rect(0, 0, W, 22, 'F')
 
-    pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
-    heightLeft -= pageHeight
+    pdf.setTextColor(255, 255, 255)
+    pdf.setFontSize(13)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('Dons Espirituais — Comunidade Siloé', margin, 14)
 
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-      pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
-      heightLeft -= pageHeight
+    // Nome e data
+    pdf.setTextColor(40, 40, 40)
+    pdf.setFontSize(16)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text(response.value.name, margin, 36)
+
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setTextColor(100, 100, 100)
+    pdf.text(formatDate(response.value.created_at), margin, 43)
+
+    // Gráfico
+    const canvas = chartRef.value?.getChartCanvas()
+    if (canvas) {
+      const chartImg = await html2canvas(canvas, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+      const imgData = chartImg.toDataURL('image/png')
+      const chartH = (chartImg.height / chartImg.width) * contentW
+      pdf.addImage(imgData, 'PNG', margin, 52, contentW, Math.min(chartH, H - 70))
     }
 
-    pdf.save(`dons-espirituais-${response.value.name.replace(/\s+/g, '-')}.pdf`)
+    // ── Página 2: análise IA (só se disponível) ────────────────────
+    const aiText = response.value.ai_analysis
+    if (aiText) {
+      pdf.addPage()
+
+      pdf.setFillColor(27, 84, 56)
+      pdf.rect(0, 0, W, 22, 'F')
+      pdf.setTextColor(255, 255, 255)
+      pdf.setFontSize(13)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('Reflexão sobre seus dons', margin, 14)
+
+      pdf.setTextColor(40, 40, 40)
+      pdf.setFontSize(11)
+      pdf.setFont('helvetica', 'normal')
+
+      const lines = pdf.splitTextToSize(aiText, contentW)
+      let y = 34
+      const lineH = 6
+
+      for (const line of lines) {
+        if (y + lineH > H - margin) {
+          pdf.addPage()
+          y = margin
+        }
+        pdf.text(line, margin, y)
+        y += lineH
+      }
+    }
+
+    const slug = response.value.name.replace(/\s+/g, '-').toLowerCase()
+    pdf.save(`dons-espirituais-${slug}.pdf`)
   } catch (err) {
     console.error('Erro ao exportar PDF:', err)
   } finally {

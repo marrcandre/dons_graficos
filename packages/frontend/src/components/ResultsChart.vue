@@ -1,14 +1,14 @@
 <template>
   <v-card rounded="xl" elevation="1" class="pa-4">
     <h2 class="text-h6 font-weight-bold text-primary mb-4">Pontuação por dom</h2>
-    <div style="position: relative; height: 520px">
+    <div ref="chartWrapperEl" style="position: relative; height: 520px">
       <Bar :data="chartData" :options="chartOptions" />
     </div>
   </v-card>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -25,6 +25,14 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 const props = defineProps({
   scores: { type: Object, required: true },
 })
+
+const chartWrapperEl = ref(null)
+
+function getChartCanvas() {
+  return chartWrapperEl.value?.querySelector('canvas') ?? null
+}
+
+defineExpose({ getChartCanvas })
 
 const ranked = computed(() => rankGifts(props.scores))
 
