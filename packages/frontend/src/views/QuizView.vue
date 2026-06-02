@@ -30,9 +30,9 @@
         v-if="quizStore.currentQuestion"
         :question="quizStore.currentQuestion"
         :model-value="quizStore.answers[quizStore.currentQuestionId]"
-        @update:model-value="(val) => quizStore.setAnswer(quizStore.currentQuestionId, val)"
+        @update:model-value="handleAnswer"
         @next="handleNext"
-        @prev="quizStore.prevQuestion()"
+        @prev="handlePrev"
         :is-first="quizStore.currentIndex === 0"
         :is-last="quizStore.currentIndex === quizStore.totalQuestions - 1"
       />
@@ -63,6 +63,14 @@ const authStore = useAuthStore()
 
 const step = ref('loading')
 const showResumeDialog = ref(false)
+const autoAdvancing = ref(false)
+
+function preMarkZeroIfBlank() {
+  const id = quizStore.currentQuestionId
+  if (quizStore.answers[id] === undefined) {
+    quizStore.setAnswer(id, 0)
+  }
+}
 
 onMounted(() => {
   const hasSaved = quizStore.checkSavedState()
@@ -90,11 +98,37 @@ function handleStartFresh() {
 function handleUserInfoSubmit(info) {
   quizStore.setUserInfo(info)
   step.value = 'quiz'
+  preMarkZeroIfBlank()
+}
+
+function handleAnswer(val) {
+  const isLast = quizStore.currentIndex === quizStore.totalQuestions - 1
+  quizStore.setAnswer(quizStore.currentQuestionId, val)
+
+  // Auto-avanço após 350ms para o usuário ver a seleção
+  if (!autoAdvancing.value) {
+    autoAdvancing.value = true
+    setTimeout(async () => {
+      autoAdvancing.value = false
+      if (isLast) {
+        await submitQuiz()
+      } else {
+        quizStore.nextQuestion()
+        preMarkZeroIfBlank()
+      }
+    }, 350)
+  }
+}
+
+function handlePrev() {
+  quizStore.prevQuestion()
+  preMarkZeroIfBlank()
 }
 
 async function handleNext() {
   if (!quizStore.isComplete) {
     quizStore.nextQuestion()
+    preMarkZeroIfBlank()
     return
   }
   await submitQuiz()
