@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
       from: emailFrom,
       to: response.email,
       cc: adminEmail,
-      subject: 'Seu resultado: Dons Espirituais — Comunidade Siloé',
+      subject: 'Seu resultado: Dons Espirituais',
       html: htmlBody,
     }),
   })

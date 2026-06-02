@@ -36,7 +36,7 @@
       </v-btn>
 
       <p class="text-caption text-center text-medium-emphasis mt-4">
-        Comunidade Siloé — Seus dados são usados somente para identificação do seu resultado.
+        Seus dados são usados somente para identificação do seu resultado.
       </p>
     </v-card>
   </v-container>

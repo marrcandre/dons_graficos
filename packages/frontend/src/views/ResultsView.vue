@@ -147,7 +147,7 @@ async function exportPDF() {
     pdf.setTextColor(255, 255, 255)
     pdf.setFontSize(13)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Dons Espirituais — Comunidade Siloé', margin, 14)
+    pdf.text('Dons Espirituais', margin, 14)
 
     // Nome e data
     pdf.setTextColor(40, 40, 40)
