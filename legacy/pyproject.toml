@@ -9,8 +9,10 @@ authors = [
 ]
 dependencies = [
     "matplotlib>=3.7.1",
-    "pandas>=2.2.2",
+    "pandas>=3.0.3",
     "seaborn>=0.12.2",
+    "supabase>=2.30.1",
+    "openpyxl>=3.1.5",
 ]
 requires-python = ">=3.11"
 license = {text = "MIT"}
