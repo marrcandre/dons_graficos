@@ -53,7 +53,7 @@ Analise o resultado considerando:
 8. Escreva em linguagem encorajadora, equilibrada e pastoral (porém impessoal, sem se referir a si mesmo), dirigindo-se a ${name} diretamente usando "você".
 9. Evite determinismo — lembre que o teste é uma ferramenta de autoconhecimento e deve ser confirmado pela prática, pelo testemunho da igreja e pela direção do Espírito Santo.
 
-Formato: prosa corrida, sem títulos, sem marcadores, 4 a 6 parágrafos, máximo de 2500 caracteres.
+Formato: prosa corrida, sem títulos, sem marcadores, 4 a 6 parágrafos, tamanho máximo de 2500 caracteres, para caber em uma página.
 Finalize com um versículo bíblico relevante.`
 }
 
