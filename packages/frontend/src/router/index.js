@@ -49,8 +49,14 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
-  // Aguardar carregamento inicial da sessão
-  if (!authStore.initialized) {
+  const needsAuthState = to.meta.requiresAuth || to.meta.requiresAdmin || to.name === 'login'
+
+  // Rotas públicas, como /results/:id, não devem ficar bloqueadas pelo Auth.
+  if (!authStore.initialized && !needsAuthState) {
+    authStore.init().catch((err) => console.error('Erro ao inicializar autenticação:', err))
+  }
+
+  if (!authStore.initialized && needsAuthState) {
     await authStore.init()
   }
 
