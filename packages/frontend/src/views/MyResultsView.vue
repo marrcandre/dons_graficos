@@ -17,6 +17,19 @@
       <v-progress-circular indeterminate color="primary" size="48" />
     </div>
 
+    <v-alert
+      v-else-if="error"
+      type="error"
+      variant="tonal"
+      rounded="xl"
+      class="mb-4"
+    >
+      {{ error }}
+      <template #append>
+        <v-btn variant="text" color="error" @click="loadResults">Tentar novamente</v-btn>
+      </template>
+    </v-alert>
+
     <v-card v-else-if="rows.length === 0" rounded="xl" elevation="1" class="pa-8 text-center">
       <v-icon size="56" color="grey-lighten-1" class="mb-4">mdi-clipboard-text-outline</v-icon>
       <p class="text-body-1 text-medium-emphasis mb-4">Você ainda não fez nenhum teste.</p>
@@ -78,22 +91,39 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '../services/supabase.js'
+import { runSupabaseQuery } from '../services/supabaseQuery.js'
 import { useAuthStore } from '../stores/auth.js'
 import { rankGifts } from '../services/scoring.js'
 
 const authStore = useAuthStore()
 const loading = ref(true)
+const error = ref(null)
 const rows = ref([])
 
-onMounted(async () => {
-  const { data } = await supabase
-    .from('responses')
-    .select('id, created_at, gp, scores, ai_analysis, email_sent')
-    .eq('user_id', authStore.user.id)
-    .order('created_at', { ascending: false })
-  rows.value = data ?? []
-  loading.value = false
-})
+onMounted(loadResults)
+
+async function loadResults() {
+  loading.value = true
+  error.value = null
+
+  try {
+    const { data, error: fetchError } = await runSupabaseQuery(
+      supabase
+        .from('responses')
+        .select('id, created_at, gp, scores, ai_analysis, email_sent')
+        .eq('user_id', authStore.user.id)
+        .order('created_at', { ascending: false })
+    )
+
+    if (fetchError) throw fetchError
+    rows.value = data ?? []
+  } catch (err) {
+    console.error('Erro ao carregar resultados:', err)
+    error.value = 'Não foi possível carregar seus resultados. Tente novamente.'
+  } finally {
+    loading.value = false
+  }
+}
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', {

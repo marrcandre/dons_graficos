@@ -52,6 +52,19 @@
     </v-card>
 
     <!-- Tabela -->
+    <v-alert
+      v-if="error"
+      type="error"
+      variant="tonal"
+      rounded="xl"
+      class="mb-4"
+    >
+      {{ error }}
+      <template #append>
+        <v-btn variant="text" color="error" @click="loadRows">Tentar novamente</v-btn>
+      </template>
+    </v-alert>
+
     <v-card rounded="xl" elevation="1">
       <v-data-table
         :headers="headers"
@@ -104,10 +117,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '../services/supabase.js'
+import { runSupabaseQuery } from '../services/supabaseQuery.js'
 import { rankGifts } from '../services/scoring.js'
 
 const loading = ref(true)
 const exporting = ref(false)
+const error = ref(null)
 const rows = ref([])
 const search = ref('')
 const filterGP = ref('')
@@ -139,15 +154,29 @@ const filteredRows = computed(() => {
   })
 })
 
-onMounted(async () => {
-  const { data, error } = await supabase
-    .from('responses')
-    .select('id, name, email, gp, age, created_at, scores, ai_analysis, email_sent')
-    .order('created_at', { ascending: false })
+onMounted(loadRows)
 
-  if (!error) rows.value = data ?? []
-  loading.value = false
-})
+async function loadRows() {
+  loading.value = true
+  error.value = null
+
+  try {
+    const { data, error: fetchError } = await runSupabaseQuery(
+      supabase
+        .from('responses')
+        .select('id, name, email, gp, age, created_at, scores, ai_analysis, email_sent')
+        .order('created_at', { ascending: false })
+    )
+
+    if (fetchError) throw fetchError
+    rows.value = data ?? []
+  } catch (err) {
+    console.error('Erro ao carregar painel admin:', err)
+    error.value = 'Não foi possível carregar o painel admin. Tente novamente.'
+  } finally {
+    loading.value = false
+  }
+}
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', {
