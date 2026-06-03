@@ -50,11 +50,11 @@ Analise o resultado considerando:
 5. Sugira áreas de serviço e ministérios onde poderá ser mais frutífera.
 6. Explique como os dons principais podem trabalhar em conjunto.
 7. Apresente orientações práticas para o desenvolvimento espiritual e ministerial.
-8. Escreva em linguagem encorajadora, equilibrada e pastoral, dirigindo-se a ${name} diretamente usando "você".
+8. Escreva em linguagem encorajadora, equilibrada e pastoral (porém impessoal, sem se referir a si mesmo), dirigindo-se a ${name} diretamente usando "você".
 9. Evite determinismo — lembre que o teste é uma ferramenta de autoconhecimento e deve ser confirmado pela prática, pelo testemunho da igreja e pela direção do Espírito Santo.
 
-Formato: prosa corrida, sem títulos, sem marcadores, 4 a 6 parágrafos.
-Finalize com um versículo bíblico relevante em destaque.`
+Formato: prosa corrida, sem títulos, sem marcadores, 4 a 6 parágrafos, máximo de 3000 caracteres.
+Finalize com um versículo bíblico relevante.`
 }
 
 function formatScores(scores: Record<string, number>): string {
