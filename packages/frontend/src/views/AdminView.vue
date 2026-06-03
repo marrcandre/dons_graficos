@@ -160,6 +160,10 @@ function topGift(scores) {
   return rankGifts(scores)[0]?.gift.name ?? '—'
 }
 
+function csvCell(value) {
+  return `"${String(value ?? '').replaceAll('"', '""')}"`
+}
+
 function exportCSV() {
   exporting.value = true
 
@@ -168,12 +172,12 @@ function exportCSV() {
 
   for (const r of filteredRows.value) {
     const row = [
-      `"${r.name ?? ''}"`,
-      `"${r.email ?? ''}"`,
-      `"${r.gp ?? ''}"`,
+      csvCell(r.name),
+      csvCell(r.email),
+      csvCell(r.gp),
       r.age ?? '',
       formatDate(r.created_at),
-      `"${topGift(r.scores)}"`,
+      csvCell(topGift(r.scores)),
       r.ai_analysis ? 'sim' : 'não',
       r.email_sent ? 'sim' : 'não',
       r.id,
@@ -181,7 +185,7 @@ function exportCSV() {
     csvRows.push(row.join(','))
   }
 
-  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const blob = new Blob([`\ufeff${csvRows.join('\r\n')}`], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

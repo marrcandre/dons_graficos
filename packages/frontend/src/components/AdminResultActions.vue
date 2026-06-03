@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { supabase } from '../services/supabase.js'
 
 const props = defineProps({
@@ -75,6 +75,13 @@ const regenerating = ref(false)
 const sendingEmail = ref(false)
 
 const snackbar = ref({ show: false, text: '', color: 'success' })
+
+watch(
+  () => props.response.ai_analysis,
+  (value) => {
+    aiText.value = value ?? ''
+  }
+)
 
 function notify(text, color = 'success') {
   snackbar.value = { show: true, text, color }
