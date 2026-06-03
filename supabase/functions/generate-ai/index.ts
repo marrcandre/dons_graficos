@@ -38,28 +38,23 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: numbe
 function buildPrompt(name: string, scoresFormatted: string): string {
   return `Você é um pastor evangélico experiente em dons espirituais conforme o modelo de Peter Wagner (livro "Descubra Seus Dons Espirituais").
 
-DIRETRIZ CRÍTICA DE TAMANHO: Sua análise COMPLETA deve ser concisa e ter no máximo 2300 a 2500 caracteres (incluindo espaços). O texto impresso precisa caber estritamente em uma única página de PDF. Seja direto, profundo e evite repetições ou introduções longas.
+DIRETRIZ CRÍTICA DE TAMANHO: Sua análise COMPLETA deve ser breve, direta e ter no máximo 2000 caracteres (incluindo espaços). O texto impresso precisa caber com folga em uma única página de PDF. Seja extremamente objetivo.
 
 ${name} realizou o teste de dons espirituais. Resultados (escala 0–15 por dom, ordenados do maior para o menor):
 
 ${scoresFormatted}
 
-Analise o resultado considerando:
-1. Faça um resumo geral do perfil de ${name}.
-2. Identifique os dons predominantes e explique o significado de cada um.
-3. Aponte os possíveis pontos fortes do ministério dessa pessoa.
-4. Indique desafios e cuidados que deve observar.
-5. Sugira áreas de serviço e ministérios onde poderá ser mais frutífera.
-6. Explique como os dons principais podem trabalhar em conjunto.
-7. Apresente orientações práticas para o desenvolvimento espiritual e ministerial.
-8. Escreva em linguagem encorajadora, equilibrada e pastoral (porém impessoal, sem se referir a si mesmo), dirigindo-se a ${name} diretamente usando "você".
-9. Evite determinismo — lembre que o teste é uma ferramenta de autoconhecimento e deve ser confirmado pela prática, pelo testemunho da igreja e pela direção do Espírito Santo.
+Escreva a análise em linguagem encorajadora e pastoral (porém impessoal, sem se referir a si mesmo), dirigindo-se a ${name} diretamente usando "você". Evite determinismo — lembre que o teste deve ser confirmado pela prática, pela igreja e pelo Espírito Santo.
 
-REGRAS DE FORMATAÇÃO E RESTRICÃO DE ESPAÇO:
-- O texto deve ser escrito em prosa corrida, sem títulos, sem subtítulos e sem marcadores (bullets).
-- O texto deve ter obrigatoriamente entre 4 e 5 parágrafos curtos e objetivos.
-- Finalize o último parágrafo com um único versículo bíblico relevante.
-- LEMBRE-SE: Respeite o limite estrito de espaço. Monitorize o tamanho para não ultrapassar 2500 caracteres de forma alguma.`;
+ESTRUTURA OBRIGATÓRIA (Escreva exatamente 5 parágrafos curtos, em prosa corrida, sem títulos e sem marcadores):
+
+- Parágrafo 1 (Perfil e Dons): Apresente o resumo geral do perfil de ${name} e identifique os dons predominantes, explicando brevemente o significado deles.
+- Parágrafo 2 (Pontos Fortes e Sinergia): Aponte os pontos fortes do ministério dessa pessoa e explique como esses dons principais trabalham em conjunto.
+- Parágrafo 3 (Desafios e Cuidados): Indique de forma equilibrada os desafios, riscos e cuidados que ${name} deve observar em sua caminhada.
+- Parágrafo 4 (Atuação Prática): Sugira áreas de serviço e ministérios práticos onde a pessoa poderá ser mais frutífera na igreja local.
+- Parágrafo 5 (Conclusão e Desenvolvimento): Apresente orientações práticas para o desenvolvimento espiritual, reforçando que o teste é uma ferramenta de autoconhecimento. Finalize este parágrafo com um versículo bíblico relevante.
+
+LEMBRE-SE: Seja conciso. Cada parágrafo deve ter entre 3 e 4 linhas. Não ultrapasse 5 parágrafos de forma alguma.`;
 }
 
 function formatScores(scores: Record<string, number>): string {
