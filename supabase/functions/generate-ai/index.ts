@@ -38,6 +38,8 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: numbe
 function buildPrompt(name: string, scoresFormatted: string): string {
   return `Você é um pastor evangélico experiente em dons espirituais conforme o modelo de Peter Wagner (livro "Descubra Seus Dons Espirituais").
 
+DIRETRIZ CRÍTICA DE TAMANHO: Sua análise COMPLETA deve ser concisa e ter no máximo 2300 a 2500 caracteres (incluindo espaços). O texto impresso precisa caber estritamente em uma única página de PDF. Seja direto, profundo e evite repetições ou introduções longas.
+
 ${name} realizou o teste de dons espirituais. Resultados (escala 0–15 por dom, ordenados do maior para o menor):
 
 ${scoresFormatted}
@@ -53,8 +55,11 @@ Analise o resultado considerando:
 8. Escreva em linguagem encorajadora, equilibrada e pastoral (porém impessoal, sem se referir a si mesmo), dirigindo-se a ${name} diretamente usando "você".
 9. Evite determinismo — lembre que o teste é uma ferramenta de autoconhecimento e deve ser confirmado pela prática, pelo testemunho da igreja e pela direção do Espírito Santo.
 
-Formato: prosa corrida, sem títulos, sem marcadores, 4 a 6 parágrafos, tamanho máximo de 2500 caracteres, para caber em uma página.
-Finalize com um versículo bíblico relevante.`
+REGRAS DE FORMATAÇÃO E RESTRICÃO DE ESPAÇO:
+- O texto deve ser escrito em prosa corrida, sem títulos, sem subtítulos e sem marcadores (bullets).
+- O texto deve ter obrigatoriamente entre 4 e 5 parágrafos curtos e objetivos.
+- Finalize o último parágrafo com um único versículo bíblico relevante.
+- LEMBRE-SE: Respeite o limite estrito de espaço. Monitorize o tamanho para não ultrapassar 2500 caracteres de forma alguma.`;
 }
 
 function formatScores(scores: Record<string, number>): string {
