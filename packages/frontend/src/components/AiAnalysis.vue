@@ -16,7 +16,27 @@
       {{ text }}
     </div>
 
-    <!-- Sem análise (erro ou não disponível) -->
+    <v-alert
+      v-else-if="error"
+      type="error"
+      variant="tonal"
+      rounded="lg"
+      class="text-body-2"
+    >
+      {{ error }}
+      <template #append>
+        <v-btn
+          variant="text"
+          color="error"
+          :loading="generating"
+          @click="generateAnalysis"
+        >
+          Tentar novamente
+        </v-btn>
+      </template>
+    </v-alert>
+
+    <!-- Sem análise disponível -->
     <v-alert
       v-else
       type="info"
@@ -25,6 +45,16 @@
       class="text-body-2"
     >
       A análise personalizada será disponibilizada em breve. Você receberá um email quando estiver pronta.
+      <template #append>
+        <v-btn
+          variant="text"
+          color="info"
+          :loading="generating"
+          @click="generateAnalysis"
+        >
+          Gerar agora
+        </v-btn>
+      </template>
     </v-alert>
   </v-card>
 </template>
@@ -40,28 +70,67 @@ const props = defineProps({
 
 const text = ref(props.initialText)
 const loading = ref(!props.initialText)
+const generating = ref(false)
+const error = ref(null)
 
 let subscription = null
 let pollInterval = null
 let pollAttempts = 0
 const MAX_POLL_ATTEMPTS = 24 // ~2 minutos a cada 5s
 
+function stopPolling() {
+  clearInterval(pollInterval)
+  pollInterval = null
+}
+
+function startPolling() {
+  stopPolling()
+  pollAttempts = 0
+  pollForAnalysis()
+  pollInterval = setInterval(pollForAnalysis, 5000)
+}
+
 async function pollForAnalysis() {
   pollAttempts++
-  const { data } = await supabase
+  const { data, error: fetchError } = await supabase
     .from('responses')
     .select('ai_analysis')
     .eq('id', props.responseId)
     .single()
 
+  if (fetchError) {
+    console.error('Erro ao consultar análise IA:', fetchError)
+  }
+
   if (data?.ai_analysis) {
     text.value = data.ai_analysis
     loading.value = false
-    clearInterval(pollInterval)
+    error.value = null
+    stopPolling()
     subscription?.unsubscribe()
   } else if (pollAttempts >= MAX_POLL_ATTEMPTS) {
     loading.value = false // exibe mensagem de "em breve"
-    clearInterval(pollInterval)
+    stopPolling()
+  }
+}
+
+async function generateAnalysis() {
+  generating.value = true
+  loading.value = true
+  error.value = null
+
+  try {
+    const { error: invokeError } = await supabase.functions.invoke('generate-ai', {
+      body: { responseId: props.responseId, force: true },
+    })
+    if (invokeError) throw invokeError
+    startPolling()
+  } catch (err) {
+    console.error('Erro ao gerar análise IA:', err)
+    loading.value = false
+    error.value = 'Não foi possível gerar a análise agora. Tente novamente em instantes.'
+  } finally {
+    generating.value = false
   }
 }
 
@@ -84,7 +153,8 @@ onMounted(() => {
         if (payload.new?.ai_analysis) {
           text.value = payload.new.ai_analysis
           loading.value = false
-          clearInterval(pollInterval)
+          error.value = null
+          stopPolling()
         }
       }
     )
@@ -92,12 +162,11 @@ onMounted(() => {
 
   // Polling de fallback a cada 5s (cobre casos onde Realtime falha
   // ou REPLICA IDENTITY FULL ainda não foi aplicado)
-  pollForAnalysis() // checar imediatamente (função pode já ter terminado)
-  pollInterval = setInterval(pollForAnalysis, 5000)
+  startPolling()
 })
 
 onUnmounted(() => {
   subscription?.unsubscribe()
-  clearInterval(pollInterval)
+  stopPolling()
 })
 </script>

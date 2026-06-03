@@ -9,6 +9,28 @@ const GIFTS_ORDER = [
   'Libertação', 'Serviço', 'Apóstolo', 'Liderança de Adoração',
 ]
 
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash'
+const GEMINI_TIMEOUT_MS = Number(Deno.env.get('GEMINI_TIMEOUT_MS') ?? 25000)
+const GEMINI_THINKING_BUDGET = Number(Deno.env.get('GEMINI_THINKING_BUDGET') ?? 0)
+
+function jsonResponse(body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 function buildPrompt(name: string, scoresFormatted: string): string {
   return `Você é um pastor evangélico experiente em dons espirituais conforme o modelo de Peter Wagner (livro "Descubra Seus Dons Espirituais").
 
@@ -51,19 +73,21 @@ Deno.serve(async (req) => {
 
   const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
   if (!geminiApiKey) {
-    return new Response(JSON.stringify({ error: 'GEMINI_API_KEY não configurada' }), { status: 500 })
+    return jsonResponse({ error: 'GEMINI_API_KEY não configurada' }, 500)
   }
 
   const adminEmail = Deno.env.get('ADMIN_EMAIL') ?? 'marcoandre@gmail.com'
   const resendApiKey = Deno.env.get('RESEND_API_KEY')
 
   let responseId: string
+  let force = false
   try {
     const body = await req.json()
     responseId = body.responseId
+    force = body.force === true
     if (!responseId) throw new Error('responseId obrigatório')
   } catch {
-    return new Response(JSON.stringify({ error: 'Body inválido' }), { status: 400 })
+    return jsonResponse({ error: 'Body inválido' }, 400)
   }
 
   // Buscar resposta
@@ -74,17 +98,21 @@ Deno.serve(async (req) => {
     .single()
 
   if (fetchError || !response) {
-    return new Response(JSON.stringify({ error: 'Resposta não encontrada' }), { status: 404 })
+    return jsonResponse({ error: 'Resposta não encontrada' }, 404)
   }
 
-  // Gerar análise via Gemini 1.5 Flash
+  if (response.ai_analysis && !force) {
+    return jsonResponse({ success: true, skipped: true })
+  }
+
+  // Gerar análise via Gemini
   const scoresFormatted = formatScores(response.scores)
   const prompt = buildPrompt(response.name, scoresFormatted)
 
   let aiAnalysis: string
   try {
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+    const geminiRes = await fetchWithTimeout(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -93,14 +121,18 @@ Deno.serve(async (req) => {
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 1024,
+            thinkingConfig: {
+              thinkingBudget: GEMINI_THINKING_BUDGET,
+            },
           },
         }),
-      }
+      },
+      GEMINI_TIMEOUT_MS,
     )
 
     if (!geminiRes.ok) {
       const err = await geminiRes.text()
-      throw new Error(`Gemini API error: ${err}`)
+      throw new Error(`Gemini API error (${geminiRes.status}): ${err}`)
     }
 
     const geminiData = await geminiRes.json()
@@ -108,7 +140,10 @@ Deno.serve(async (req) => {
     if (!aiAnalysis) throw new Error('Gemini retornou conteúdo vazio')
   } catch (err) {
     console.error('Erro ao chamar Gemini:', err)
-    return new Response(JSON.stringify({ error: 'Falha na geração IA' }), { status: 502 })
+    const message = err instanceof Error && err.name === 'AbortError'
+      ? `A chamada ao Gemini excedeu ${GEMINI_TIMEOUT_MS / 1000}s`
+      : err instanceof Error ? err.message : 'Falha desconhecida na geração IA'
+    return jsonResponse({ error: 'Falha na geração IA', detail: message, model: GEMINI_MODEL }, 502)
   }
 
   // Salvar análise no banco
@@ -119,7 +154,7 @@ Deno.serve(async (req) => {
 
   if (updateError) {
     console.error('Erro ao salvar ai_analysis:', updateError)
-    return new Response(JSON.stringify({ error: 'Erro ao salvar análise' }), { status: 500 })
+    return jsonResponse({ error: 'Erro ao salvar análise' }, 500)
   }
 
   // Enviar email de notificação para o admin (best-effort)
@@ -149,7 +184,5 @@ Deno.serve(async (req) => {
     }).catch((e) => console.error('Erro ao notificar admin:', e))
   }
 
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { 'Content-Type': 'application/json' },
-  })
+  return jsonResponse({ success: true, model: GEMINI_MODEL })
 })

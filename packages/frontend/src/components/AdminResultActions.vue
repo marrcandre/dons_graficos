@@ -107,12 +107,14 @@ async function saveAiAnalysis() {
 async function regenerateAi() {
   regenerating.value = true
   try {
-    await supabase.functions.invoke('generate-ai', {
+    const { error } = await supabase.functions.invoke('generate-ai', {
       body: { responseId: props.response.id, force: true },
     })
+    if (error) throw error
     notify('Regeneração iniciada. Aguarde alguns segundos.')
     emit('updated')
-  } catch {
+  } catch (err) {
+    console.error('Erro ao regenerar análise:', err)
     notify('Erro ao regenerar análise.', 'error')
   } finally {
     regenerating.value = false

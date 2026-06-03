@@ -164,7 +164,14 @@ async function submitQuiz() {
     quizStore.clearState()
 
     // Disparar análise IA de forma assíncrona (não bloquear redirect)
-    supabase.functions.invoke('generate-ai', { body: { responseId: data.id } }).catch(() => {})
+    supabase.functions
+      .invoke('generate-ai', { body: { responseId: data.id } })
+      .then(({ error }) => {
+        if (error) console.error('Erro ao iniciar geração IA:', error)
+      })
+      .catch((err) => {
+        console.error('Erro ao iniciar geração IA:', err)
+      })
 
     router.push({ name: 'results', params: { id: data.id } })
   } catch (err) {
