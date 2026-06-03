@@ -10,6 +10,10 @@ const GIFTS_ORDER = [
 ]
 
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash'
+const GEMINI_FALLBACK_MODELS = (Deno.env.get('GEMINI_FALLBACK_MODELS') ?? 'gemini-2.5-flash-lite')
+  .split(',')
+  .map((model) => model.trim())
+  .filter(Boolean)
 const GEMINI_TIMEOUT_MS = Number(Deno.env.get('GEMINI_TIMEOUT_MS') ?? 25000)
 const GEMINI_THINKING_BUDGET = Number(Deno.env.get('GEMINI_THINKING_BUDGET') ?? 0)
 
@@ -61,6 +65,59 @@ function formatScores(scores: Record<string, number>): string {
     .join('\n')
 }
 
+async function generateGeminiAnalysis(prompt: string, apiKey: string) {
+  const models = [GEMINI_MODEL, ...GEMINI_FALLBACK_MODELS]
+  let lastError: Error | null = null
+
+  for (const model of models) {
+    try {
+      const geminiRes = await fetchWithTimeout(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 1024,
+              thinkingConfig: {
+                thinkingBudget: GEMINI_THINKING_BUDGET,
+              },
+            },
+          }),
+        },
+        GEMINI_TIMEOUT_MS,
+      )
+
+      if (!geminiRes.ok) {
+        const err = await geminiRes.text()
+        const error = new Error(`Gemini API error (${geminiRes.status}) using ${model}: ${err}`)
+        if (geminiRes.status === 429 || geminiRes.status === 503) {
+          lastError = error
+          console.error(error)
+          continue
+        }
+        throw error
+      }
+
+      const geminiData = await geminiRes.json()
+      const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+      if (!text) throw new Error(`Gemini retornou conteúdo vazio usando ${model}`)
+      return { text, model }
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error('Falha desconhecida na geração IA')
+      if (lastError.name === 'AbortError') {
+        console.error(`Timeout ao chamar Gemini usando ${model}:`, lastError)
+        continue
+      }
+      throw lastError
+    }
+  }
+
+  throw lastError ?? new Error('Nenhum modelo Gemini disponível')
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
@@ -110,40 +167,17 @@ Deno.serve(async (req) => {
   const prompt = buildPrompt(response.name, scoresFormatted)
 
   let aiAnalysis: string
+  let usedModel = GEMINI_MODEL
   try {
-    const geminiRes = await fetchWithTimeout(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-            thinkingConfig: {
-              thinkingBudget: GEMINI_THINKING_BUDGET,
-            },
-          },
-        }),
-      },
-      GEMINI_TIMEOUT_MS,
-    )
-
-    if (!geminiRes.ok) {
-      const err = await geminiRes.text()
-      throw new Error(`Gemini API error (${geminiRes.status}): ${err}`)
-    }
-
-    const geminiData = await geminiRes.json()
-    aiAnalysis = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-    if (!aiAnalysis) throw new Error('Gemini retornou conteúdo vazio')
+    const result = await generateGeminiAnalysis(prompt, geminiApiKey)
+    aiAnalysis = result.text
+    usedModel = result.model
   } catch (err) {
     console.error('Erro ao chamar Gemini:', err)
     const message = err instanceof Error && err.name === 'AbortError'
       ? `A chamada ao Gemini excedeu ${GEMINI_TIMEOUT_MS / 1000}s`
       : err instanceof Error ? err.message : 'Falha desconhecida na geração IA'
-    return jsonResponse({ error: 'Falha na geração IA', detail: message, model: GEMINI_MODEL }, 502)
+    return jsonResponse({ error: 'Falha na geração IA', detail: message, model: GEMINI_MODEL, fallbacks: GEMINI_FALLBACK_MODELS }, 502)
   }
 
   // Salvar análise no banco
@@ -184,5 +218,5 @@ Deno.serve(async (req) => {
     }).catch((e) => console.error('Erro ao notificar admin:', e))
   }
 
-  return jsonResponse({ success: true, model: GEMINI_MODEL })
+  return jsonResponse({ success: true, model: usedModel })
 })
