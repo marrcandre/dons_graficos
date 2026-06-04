@@ -81,3 +81,17 @@ dist/
 build/
 coverage/
 .cache/
+
+# legacy python artifacts
+legacy/.pdm-python/
+legacy/figs/
+
+# env
+.env
+.env.*
+packages/frontend/.env
+packages/functions/.env
+
+# node
+node_modules/
+dist/
