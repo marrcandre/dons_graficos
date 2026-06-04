@@ -1,0 +1,16 @@
+# python env
+.venv/
+__pycache__/
+*.pyc
+
+# pdm
+.pdm-python
+.pdm.toml
+
+# outputs
+figs/
+*.xlsx
+*.csv
+
+# cache
+.cache/

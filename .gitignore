@@ -1,91 +1,3 @@
-# =========================================================
-# PROJETO (VUE + SUPABASE + LEGACY PYTHON)
-# =========================================================
-
-# -------------------------
-# FRONTEND (Vue / Vite)
-# -------------------------
-packages/frontend/node_modules/
-packages/frontend/dist/
-packages/frontend/dist-ssr/
-packages/frontend/.vite/
-
-# -------------------------
-# SUPABASE
-# -------------------------
-.supabase/
-
-# Edge Functions deps (caso use local bundling)
-packages/functions/node_modules/
-
-# -------------------------
-# ENV FILES
-# -------------------------
-.env
-.env.*
-!.env.example
-
-packages/frontend/.env
-packages/frontend/.env.*
-packages/functions/.env
-packages/functions/.env.*
-
-# -------------------------
-# LOGS
-# -------------------------
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-
-# -------------------------
-# SYSTEM FILES
-# -------------------------
-.DS_Store
-Thumbs.db
-
-# -------------------------
-# EDITORS / IDEs
-# -------------------------
-.vscode/
-.idea/
-*.swp
-
-# -------------------------
-# PYTHON (LEGACY - SEM AFETAR CÓDIGO EXISTENTE)
-# -------------------------
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-
-# virtual environments (caso existam no legacy ou futuro)
-.venv/
-venv/
-ENV/
-
-# Python tooling caches
-.pytest_cache/
-.mypy_cache/
-.pytype/
-.coverage
-htmlcov/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# -------------------------
-# BUILD / CACHE GENÉRICO
-# -------------------------
-dist/
-build/
-coverage/
-.cache/
-
-# legacy python artifacts
-legacy/.pdm-python/
-legacy/figs/
-
 # env
 .env
 .env.*
@@ -95,3 +7,12 @@ packages/functions/.env
 # node
 node_modules/
 dist/
+
+# supabase local
+.supabase/
+
+# OS
+.DS_Store
+
+# logs
+*.log
