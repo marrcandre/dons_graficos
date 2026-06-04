@@ -14,6 +14,7 @@ const GEMINI_FALLBACK_MODELS = (Deno.env.get('GEMINI_FALLBACK_MODELS') ?? 'gemin
   .split(',')
   .map((model) => model.trim())
   .filter(Boolean)
+
 const GEMINI_TIMEOUT_MS = Number(Deno.env.get('GEMINI_TIMEOUT_MS') ?? 25000)
 const GEMINI_THINKING_BUDGET = Number(Deno.env.get('GEMINI_THINKING_BUDGET') ?? 0)
 
@@ -38,23 +39,14 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: numbe
 function buildPrompt(name: string, scoresFormatted: string): string {
   return `Você é um pastor evangélico experiente em dons espirituais conforme o modelo de Peter Wagner (livro "Descubra Seus Dons Espirituais").
 
-DIRETRIZ CRÍTICA DE TAMANHO: Sua análise COMPLETA deve ser breve, direta e ter no máximo 2000 caracteres (incluindo espaços). O texto impresso precisa caber com folga em uma única página de PDF. Seja extremamente objetivo.
+DIRETRIZ CRÍTICA DE TAMANHO: Sua análise COMPLETA deve ser breve, direta e ter no máximo 2000 caracteres (incluindo espaços).
 
-${name} realizou o teste de dons espirituais. Resultados (escala 0–15 por dom, ordenados do maior para o menor):
+${name} realizou o teste de dons espirituais.
 
+Resultados:
 ${scoresFormatted}
 
-Escreva a análise em linguagem encorajadora e pastoral (porém impessoal, sem se referir a si mesmo), dirigindo-se a ${name} diretamente usando "você". Evite determinismo — lembre que o teste deve ser confirmado pela prática, pela igreja e pelo Espírito Santo.
-
-ESTRUTURA OBRIGATÓRIA (Escreva exatamente 5 parágrafos curtos, em prosa corrida, sem títulos e sem marcadores):
-
-- Parágrafo 1 (Perfil e Dons): Apresente o resumo geral do perfil de ${name} e identifique os dons predominantes, explicando brevemente o significado deles.
-- Parágrafo 2 (Pontos Fortes e Sinergia): Aponte os pontos fortes do ministério dessa pessoa e explique como esses dons principais trabalham em conjunto.
-- Parágrafo 3 (Desafios e Cuidados): Indique de forma equilibrada os desafios, riscos e cuidados que ${name} deve observar em sua caminhada.
-- Parágrafo 4 (Atuação Prática): Sugira áreas de serviço e ministérios práticos onde a pessoa poderá ser mais frutífera na igreja local.
-- Parágrafo 5 (Conclusão e Desenvolvimento): Apresente orientações práticas para o desenvolvimento espiritual, reforçando que o teste é uma ferramenta de autoconhecimento. Finalize este parágrafo com um versículo bíblico relevante.
-
-LEMBRE-SE: Seja conciso. Cada parágrafo deve ter entre 3 e 4 linhas. Não ultrapasse 5 parágrafos de forma alguma.`;
+Escreva uma análise pastoral em 5 parágrafos curtos, com orientação direta ao usuário.`
 }
 
 function formatScores(scores: Record<string, number>): string {
@@ -71,7 +63,7 @@ async function generateGeminiAnalysis(prompt: string, apiKey: string) {
 
   for (const model of models) {
     try {
-      const geminiRes = await fetchWithTimeout(
+      const res = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
         {
           method: 'POST',
@@ -90,32 +82,41 @@ async function generateGeminiAnalysis(prompt: string, apiKey: string) {
         GEMINI_TIMEOUT_MS,
       )
 
-      if (!geminiRes.ok) {
-        const err = await geminiRes.text()
-        const error = new Error(`Gemini API error (${geminiRes.status}) using ${model}: ${err}`)
-        if (geminiRes.status === 429 || geminiRes.status === 503) {
-          lastError = error
-          console.error(error)
+      if (!res.ok) {
+        const errText = await res.text()
+
+        const err = new Error(
+          `Gemini error (${res.status}) using ${model}: ${errText}`
+        )
+
+        if (res.status === 429 || res.status === 503) {
+          lastError = err
+          console.warn(err.message)
           continue
         }
-        throw error
+
+        throw err
       }
 
-      const geminiData = await geminiRes.json()
-      const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-      if (!text) throw new Error(`Gemini retornou conteúdo vazio usando ${model}`)
+      const data = await res.json()
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+
+      if (!text) throw new Error(`Resposta vazia Gemini (${model})`)
+
       return { text, model }
     } catch (err) {
-      lastError = err instanceof Error ? err : new Error('Falha desconhecida na geração IA')
+      lastError = err instanceof Error ? err : new Error('Erro desconhecido')
+
       if (lastError.name === 'AbortError') {
-        console.error(`Timeout ao chamar Gemini usando ${model}:`, lastError)
+        console.warn(`Timeout Gemini (${model})`)
         continue
       }
+
       throw lastError
     }
   }
 
-  throw lastError ?? new Error('Nenhum modelo Gemini disponível')
+  throw lastError ?? new Error('Nenhum modelo disponível')
 }
 
 Deno.serve(async (req) => {
@@ -129,15 +130,15 @@ Deno.serve(async (req) => {
   )
 
   const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
+  const notifyUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/notify-admin`
+
   if (!geminiApiKey) {
     return jsonResponse({ error: 'GEMINI_API_KEY não configurada' }, 500)
   }
 
-  const adminEmail = Deno.env.get('ADMIN_EMAIL') ?? 'marcoandre@gmail.com'
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
-
   let responseId: string
   let force = false
+
   try {
     const body = await req.json()
     responseId = body.responseId
@@ -147,7 +148,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Body inválido' }, 400)
   }
 
-  // Buscar resposta
   const { data: response, error: fetchError } = await supabase
     .from('responses')
     .select('id, name, email, gp, age, scores, ai_analysis')
@@ -162,60 +162,51 @@ Deno.serve(async (req) => {
     return jsonResponse({ success: true, skipped: true })
   }
 
-  // Gerar análise via Gemini
   const scoresFormatted = formatScores(response.scores)
   const prompt = buildPrompt(response.name, scoresFormatted)
 
   let aiAnalysis: string
   let usedModel = GEMINI_MODEL
+
   try {
     const result = await generateGeminiAnalysis(prompt, geminiApiKey)
     aiAnalysis = result.text
     usedModel = result.model
   } catch (err) {
-    console.error('Erro ao chamar Gemini:', err)
-    const message = err instanceof Error && err.name === 'AbortError'
-      ? `A chamada ao Gemini excedeu ${GEMINI_TIMEOUT_MS / 1000}s`
-      : err instanceof Error ? err.message : 'Falha desconhecida na geração IA'
-    return jsonResponse({ error: 'Falha na geração IA', detail: message, model: GEMINI_MODEL, fallbacks: GEMINI_FALLBACK_MODELS }, 502)
+    return jsonResponse({
+      error: 'Falha na geração IA',
+      detail: String(err),
+      model: GEMINI_MODEL,
+    }, 502)
   }
 
-  // Salvar análise no banco
   const { error: updateError } = await supabase
     .from('responses')
     .update({ ai_analysis: aiAnalysis })
     .eq('id', responseId)
 
   if (updateError) {
-    console.error('Erro ao salvar ai_analysis:', updateError)
     return jsonResponse({ error: 'Erro ao salvar análise' }, 500)
   }
 
-  // Enviar email de notificação para o admin (best-effort)
-  if (resendApiKey) {
-    const appUrl = Deno.env.get('APP_URL') ?? 'https://dons-espirituais.vercel.app'
-    const resultsUrl = `${appUrl}/results/${responseId}`
+  // 🔔 NOTIFY ADMIN (best effort, não bloqueia fluxo)
+  try {
+    console.log('Chamando notify-admin...')
 
-    await fetch('https://api.resend.com/emails', {
+    const notifyRes = await fetch(notifyUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from: Deno.env.get('EMAIL_FROM') ?? 'dons@dons-espirituais.vercel.app',
-        to: adminEmail,
-        subject: `[Dons] Novo teste: ${response.name}`,
-        html: `<p>Novo teste finalizado:</p>
-          <ul>
-            <li><strong>Nome:</strong> ${response.name}</li>
-            <li><strong>Email:</strong> ${response.email ?? 'não informado'}</li>
-            <li><strong>GP:</strong> ${response.gp ?? '—'}</li>
-            <li><strong>Idade:</strong> ${response.age ?? '—'}</li>
-          </ul>
-          <p><a href="${resultsUrl}">Ver resultado e análise IA ›</a></p>`,
-      }),
-    }).catch((e) => console.error('Erro ao notificar admin:', e))
+      body: JSON.stringify({ responseId }),
+    })
+
+    const text = await notifyRes.text()
+
+    console.log('notify-admin status:', notifyRes.status)
+    console.log('notify-admin response:', text)
+  } catch (err) {
+    console.error('Erro notify-admin (não crítico):', err)
   }
 
   return jsonResponse({ success: true, model: usedModel })

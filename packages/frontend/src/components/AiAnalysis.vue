@@ -12,10 +12,15 @@
     </div>
 
     <!-- Análise disponível -->
-    <div v-else-if="text" class="text-body-1" style="line-height: 1.8; white-space: pre-wrap">
+    <div
+      v-else-if="text"
+      class="text-body-1"
+      style="line-height: 1.8; white-space: pre-wrap"
+    >
       {{ text }}
     </div>
 
+    <!-- Erro -->
     <v-alert
       v-else-if="error"
       type="error"
@@ -44,7 +49,9 @@
       rounded="lg"
       class="text-body-2"
     >
-      A análise personalizada será disponibilizada em breve. Você receberá um email quando estiver pronta.
+      A análise personalizada ainda não está disponível.
+      Clique em "Gerar agora" para criar sua reflexão personalizada.
+
       <template #append>
         <v-btn
           variant="text"
@@ -76,6 +83,7 @@ const error = ref(null)
 let subscription = null
 let pollInterval = null
 let pollAttempts = 0
+
 const MAX_POLL_ATTEMPTS = 24 // ~2 minutos a cada 5s
 
 function stopPolling() {
@@ -92,6 +100,7 @@ function startPolling() {
 
 async function pollForAnalysis() {
   pollAttempts++
+
   const { data, error: fetchError } = await supabase
     .from('responses')
     .select('ai_analysis')
@@ -106,10 +115,11 @@ async function pollForAnalysis() {
     text.value = data.ai_analysis
     loading.value = false
     error.value = null
+
     stopPolling()
     subscription?.unsubscribe()
   } else if (pollAttempts >= MAX_POLL_ATTEMPTS) {
-    loading.value = false // exibe mensagem de "em breve"
+    loading.value = false
     stopPolling()
   }
 }
@@ -120,15 +130,28 @@ async function generateAnalysis() {
   error.value = null
 
   try {
-    const { error: invokeError } = await supabase.functions.invoke('generate-ai', {
-      body: { responseId: props.responseId, force: true },
-    })
-    if (invokeError) throw invokeError
+    const { error: invokeError } = await supabase.functions.invoke(
+      'generate-ai',
+      {
+        body: {
+          responseId: props.responseId,
+          force: true,
+        },
+      }
+    )
+
+    if (invokeError) {
+      throw invokeError
+    }
+
     startPolling()
   } catch (err) {
     console.error('Erro ao gerar análise IA:', err)
+
     loading.value = false
-    error.value = 'Não foi possível gerar a análise agora. Tente novamente em instantes.'
+
+    error.value =
+      'Não foi possível gerar a análise agora. Tente novamente em instantes.'
   } finally {
     generating.value = false
   }
@@ -154,14 +177,14 @@ onMounted(() => {
           text.value = payload.new.ai_analysis
           loading.value = false
           error.value = null
+
           stopPolling()
         }
       }
     )
     .subscribe()
 
-  // Polling de fallback a cada 5s (cobre casos onde Realtime falha
-  // ou REPLICA IDENTITY FULL ainda não foi aplicado)
+  // Polling de fallback a cada 5s
   startPolling()
 })
 
