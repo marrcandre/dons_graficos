@@ -1,7 +1,9 @@
 {
   "name": "dons-espirituais",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "npm run dev --workspace=packages/frontend",
     "build": "npm run build --workspace=packages/frontend",
@@ -9,5 +11,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
   }
 }

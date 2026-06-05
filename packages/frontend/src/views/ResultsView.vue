@@ -57,6 +57,14 @@
       <!-- Recursos -->
       <ResourcesSection class="mb-6" />
 
+      <!-- Ações do Admin -->
+      <AdminResultActions
+        v-if="authStore.isAdmin"
+        :response="response"
+        @updated="loadResponse"
+        class="mb-6"
+      />
+
       <!-- Histórico (só para o dono logado) -->
       <HistoryList
         v-if="isOwner"
@@ -125,6 +133,7 @@ import ReflectionGuide from '../components/ReflectionGuide.vue'
 import NextStepsSection from '../components/NextStepsSection.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
 import HistoryList from '../components/HistoryList.vue'
+import AdminResultActions from '../components/AdminResultActions.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()

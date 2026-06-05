@@ -124,13 +124,14 @@ async function regenerateAi() {
 async function sendEmail() {
   sendingEmail.value = true
   try {
-    const { error } = await supabase.functions.invoke('send-email', {
+    const { error } = await supabase.functions.invoke('notify-admin', {
       body: { responseId: props.response.id },
     })
     if (error) throw error
     notify('Email enviado com sucesso!')
     emit('updated')
-  } catch {
+  } catch (err) {
+    console.error('Erro ao enviar email:', err)
     notify('Erro ao enviar email.', 'error')
   } finally {
     sendingEmail.value = false

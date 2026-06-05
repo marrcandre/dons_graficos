@@ -106,13 +106,28 @@ def load_participants():
 
 
 def main():
+    # Carrega .env da raiz se as variáveis não estiverem definidas
+    if not os.environ.get('SUPABASE_URL') or not os.environ.get('SUPABASE_SERVICE_ROLE_KEY'):
+        env_path = os.path.join(os.path.dirname(__file__), '../.env')
+        if os.path.exists(env_path):
+            with open(env_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    parts = line.split('=', 1)
+                    if len(parts) == 2:
+                        key = parts[0].strip()
+                        value = parts[1].strip().strip('"').strip("'")
+                        os.environ[key] = value
+
     supabase_url = os.environ.get('SUPABASE_URL')
     service_key = os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
 
     if not supabase_url or not service_key:
         print(
             'Erro: defina SUPABASE_URL e '
-            'SUPABASE_SERVICE_ROLE_KEY como variáveis de ambiente.'
+            'SUPABASE_SERVICE_ROLE_KEY no arquivo .env na raiz do projeto.'
         )
         sys.exit(1)
 

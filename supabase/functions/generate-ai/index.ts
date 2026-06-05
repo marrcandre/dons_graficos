@@ -18,10 +18,18 @@ const GEMINI_FALLBACK_MODELS = (Deno.env.get('GEMINI_FALLBACK_MODELS') ?? 'gemin
 const GEMINI_TIMEOUT_MS = Number(Deno.env.get('GEMINI_TIMEOUT_MS') ?? 25000)
 const GEMINI_THINKING_BUDGET = Number(Deno.env.get('GEMINI_THINKING_BUDGET') ?? 0)
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 function jsonResponse(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...corsHeaders,
+    },
   })
 }
 
@@ -120,17 +128,27 @@ async function generateGeminiAnalysis(prompt: string, apiKey: string) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
 
+  if (req.method !== 'POST') {
+    return new Response('Method not allowed', {
+      status: 405,
+      headers: corsHeaders,
+    })
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+  const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
   const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    supabaseUrl,
+    supabaseServiceRoleKey,
   )
 
   const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
-  const notifyUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/notify-admin`
+  const notifyUrl = `${supabaseUrl}/functions/v1/notify-admin`
 
   if (!geminiApiKey) {
     return jsonResponse({ error: 'GEMINI_API_KEY não configurada' }, 500)
@@ -197,6 +215,8 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'apikey': supabaseServiceRoleKey,
+        'Authorization': `Bearer ${supabaseServiceRoleKey}`,
       },
       body: JSON.stringify({ responseId }),
     })

@@ -1,11 +1,23 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     console.log('NOTIFY-ADMIN: iniciado')
 
     if (req.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 })
+      return new Response('Method not allowed', {
+        status: 405,
+        headers: corsHeaders,
+      })
     }
 
     const supabase = createClient(
@@ -22,7 +34,10 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'Configuração de email ausente' }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
         },
       )
     }
@@ -34,7 +49,10 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'responseId obrigatório' }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
         },
       )
     }
@@ -52,7 +70,10 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'Resposta não encontrada' }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
         },
       )
     }
@@ -92,14 +113,45 @@ Deno.serve(async (req) => {
         }),
         {
           status: 502,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        },
+      )
+    }
+
+    // Atualiza a coluna email_sent para true na base de dados
+    const { error: updateError } = await supabase
+      .from('responses')
+      .update({ email_sent: true })
+      .eq('id', responseId)
+
+    if (updateError) {
+      console.error('Erro ao marcar email_sent como true:', updateError)
+      return new Response(
+        JSON.stringify({
+          error: 'Falha ao atualizar status no banco',
+          detail: String(updateError),
+        }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
         },
       )
     }
 
     return new Response(
       JSON.stringify({ success: true }),
-      { headers: { 'Content-Type': 'application/json' } },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      },
     )
   } catch (err) {
     console.error('ERRO:', err)
@@ -108,7 +160,10 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: 'Erro interno' }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
       },
     )
   }

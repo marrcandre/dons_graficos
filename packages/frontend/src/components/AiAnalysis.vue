@@ -34,7 +34,7 @@
           variant="text"
           color="error"
           :loading="generating"
-          @click="generateAnalysis"
+          @click="generateAnalysis(true)"
         >
           Tentar novamente
         </v-btn>
@@ -57,7 +57,7 @@
           variant="text"
           color="info"
           :loading="generating"
-          @click="generateAnalysis"
+          @click="generateAnalysis(true)"
         >
           Gerar agora
         </v-btn>
@@ -124,7 +124,7 @@ async function pollForAnalysis() {
   }
 }
 
-async function generateAnalysis() {
+async function generateAnalysis(force = false) {
   generating.value = true
   loading.value = true
   error.value = null
@@ -135,7 +135,7 @@ async function generateAnalysis() {
       {
         body: {
           responseId: props.responseId,
-          force: true,
+          force,
         },
       }
     )
@@ -184,8 +184,8 @@ onMounted(() => {
     )
     .subscribe()
 
-  // Polling de fallback a cada 5s
-  startPolling()
+  // Disparar a geração automática da análise de IA (sem forçar se já existir)
+  generateAnalysis(false)
 })
 
 onUnmounted(() => {
