@@ -42,11 +42,7 @@
       <v-list lines="two">
         <template v-for="(item, i) in rows" :key="item.id">
           <v-divider v-if="i > 0" />
-          <v-list-item
-            :to="{ name: 'results', params: { id: item.id } }"
-            rounded="0"
-            class="py-3"
-          >
+          <v-list-item @click="goToResult(item.id)" rounded="0" class="py-3">
             <template #prepend>
               <v-avatar color="primary" variant="tonal" size="42" class="mr-2">
                 <v-icon>mdi-gift-outline</v-icon>
@@ -90,8 +86,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { supabase } from '../services/supabase.js'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+function goToResult(id) {
+  router.push({ name: 'results', params: { id } })
+}
 import { runSupabaseQuery } from '../services/supabaseQuery.js'
+import { supabase } from '../services/supabase.js'
 import { useAuthStore } from '../stores/auth.js'
 import { rankGifts } from '../services/scoring.js'
 

@@ -1,8 +1,8 @@
 <template>
   <v-card rounded="xl" elevation="1" class="pa-4">
-    <h2 class="text-h6 font-weight-bold text-primary mb-4">Pontuação por dom</h2>
+    <h2 class="text-subtitle-1 font-weight-bold text-primary mb-4">Pontuação por dom</h2>
     <div ref="chartWrapperEl" style="position: relative; height: 520px">
-      <Bar :data="chartData" :options="chartOptions" />
+      <Bar :data="chartData" :options="chartOptions" :plugins="chartPlugins" />
     </div>
   </v-card>
 </template>
@@ -58,10 +58,40 @@ const chartData = computed(() => ({
   ],
 }))
 
+const chartPlugins = [
+  {
+    id: 'valueLabel',
+    afterDatasetsDraw(chart) {
+      const { ctx, data } = chart
+      ctx.save()
+      ctx.font = 'bold 11px sans-serif'
+      ctx.fillStyle = '#424242'
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+
+      const dataset = data.datasets[0]
+      const meta = chart.getDatasetMeta(0)
+
+      meta.data.forEach((bar, index) => {
+        const val = dataset.data[index]
+        const posX = bar.x + 6 // 6px à direita do fim da barra
+        const posY = bar.y
+        ctx.fillText(`${val}`, posX, posY)
+      })
+      ctx.restore()
+    }
+  }
+]
+
 const chartOptions = {
   indexAxis: 'y',
   responsive: true,
   maintainAspectRatio: false,
+  layout: {
+    padding: {
+      right: 25 // Espaço para não cortar as notas desenhadas à direita das barras
+    }
+  },
   plugins: {
     legend: { display: false },
     tooltip: {

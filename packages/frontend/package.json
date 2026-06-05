@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
     "@mdi/font": "^7.4.47",
     "@supabase/supabase-js": "^2.106.2",
     "chart.js": "^4.5.1",

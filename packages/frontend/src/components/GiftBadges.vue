@@ -1,24 +1,40 @@
 <template>
-  <v-card rounded="xl" elevation="1" class="pa-4">
-    <h2 class="text-h6 font-weight-bold text-primary mb-4">Seus dons em destaque</h2>
-    <div class="d-flex flex-wrap gap-3 justify-center">
-      <v-card
+  <v-card rounded="xl" elevation="1" class="pa-5">
+    <h2 class="text-subtitle-1 font-weight-bold text-primary mb-4">
+      <v-icon icon="mdi-star-circle-outline" class="mr-1" />
+      Dons em Destaque
+    </h2>
+    <v-row>
+      <v-col
         v-for="({ gift, score }, i) in top3"
         :key="gift.id"
-        :elevation="i === 0 ? 4 : 2"
-        rounded="xl"
-        class="pa-4 text-center"
-        color="secondary"
-        :min-width="i === 0 ? 180 : 150"
+        cols="12"
+        sm="4"
+        class="py-1 py-sm-2"
       >
-        <div class="text-caption text-white opacity-80 mb-1">
-          {{ ['🥇 1º', '🥈 2º', '🥉 3º'][i] }}
+        <div 
+          class="d-flex align-center pa-3 rounded-lg border-start"
+          :style="{
+            borderLeft: `4px solid ${['#FFD700', '#B0BEC5', '#B08D57'][i]}`,
+            backgroundColor: '#F8F9FA'
+          }"
+        >
+          <div class="mr-3">
+            <span class="text-h6 font-weight-bold" :style="{ color: ['#D4AF37', '#78909C', '#8D6E63'][i] }">
+              {{ i + 1 }}º
+            </span>
+          </div>
+          <v-icon :icon="gift.icon" size="24" class="text-medium-emphasis mr-2" />
+          <div class="flex-grow-1 min-width-0">
+            <div class="text-body-2 font-weight-bold text-high-emphasis text-truncate">{{ gift.name }}</div>
+          </div>
+          <div class="text-right ml-2">
+            <span class="text-h6 font-weight-black text-primary">{{ score }}</span>
+            <span class="text-caption text-medium-emphasis">/15</span>
+          </div>
         </div>
-        <v-icon :icon="gift.icon" size="32" color="white" class="mb-1" />
-        <div class="text-subtitle-1 font-weight-bold text-white">{{ gift.name }}</div>
-        <div class="text-h5 font-weight-black text-white">{{ score }}<span class="text-caption">/15</span></div>
-      </v-card>
-    </div>
+      </v-col>
+    </v-row>
   </v-card>
 </template>
 

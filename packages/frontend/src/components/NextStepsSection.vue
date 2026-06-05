@@ -1,40 +1,41 @@
 <template>
   <v-card rounded="xl" elevation="1" class="pa-6">
-    <h2 class="text-h6 font-weight-bold text-primary mb-4">E agora, o que fazer?</h2>
-
-    <v-timeline side="end" density="compact">
-      <v-timeline-item
-        v-for="(step, i) in steps"
-        :key="i"
-        :dot-color="i === 0 ? 'primary' : 'grey-lighten-1'"
-        size="small"
-      >
-        <div class="text-body-2">
-          <strong>{{ step.title }}</strong>
-          <p class="text-medium-emphasis mt-1 mb-0">{{ step.text }}</p>
-        </div>
-      </v-timeline-item>
-    </v-timeline>
+    <h2 class="text-subtitle-1 font-weight-bold text-primary mb-5">
+      <v-icon icon="mdi-flag-checkered" class="mr-1" />
+      Próximos Passos
+    </h2>
+    <v-list density="compact" bg-color="transparent">
+      <v-list-item v-for="(step, i) in actionSteps" :key="i" class="px-0 py-1 align-start text-body-2">
+        <template #prepend>
+          <v-icon icon="mdi-check-circle-outline" size="16" class="text-primary mr-2 mt-1" />
+        </template>
+        <span style="line-height: 1.4"><strong>{{ step.title }}:</strong> {{ step.text }}</span>
+      </v-list-item>
+    </v-list>
   </v-card>
 </template>
 
 <script setup>
-const steps = [
+const actionSteps = [
   {
-    title: 'Analise seus resultados com calma',
-    text: 'Leia a definição de cada dom que apareceu com pontuação alta. Veja quais já eram esperados e quais te surpreenderam.',
+    title: 'Comunhão',
+    text: 'Converse com seu líder de GP/ministério para discernimento coletivo.',
   },
   {
-    title: 'Converse com seu líder de GP',
-    text: 'Compartilhe o resultado e peça feedback. O discernimento coletivo é essencial — outros enxergam dons que a gente não percebe em si mesmo.',
+    title: 'Prática',
+    text: 'Busque oportunidades na prática para exercitar o que descobriu.',
   },
   {
-    title: 'Busque confirmação na prática',
-    text: 'Os dons espirituais se confirmam quando são exercidos. Encontre oportunidades de servir nas áreas que combinam com seus resultados.',
+    title: 'Oração',
+    text: 'Peça direção ao Espírito Santo sobre como Ele quer usar você.',
   },
-  {
-    title: 'Ore e busque direção',
-    text: 'Peça ao Espírito Santo que esclareça como Ele quer usar você. O teste é uma ferramenta — a direção vem d\'Ele.',
-  },
-]
+];
 </script>
+
+<style scoped>
+@media (min-width: 960px) {
+  .border-end-sm {
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+</style>
