@@ -75,9 +75,13 @@
         :items-per-page="25"
       >
         <template #item.name="{ item }">
-          <router-link :to="{ name: 'results', params: { id: item.id } }" class="text-primary font-weight-medium">
+          <span
+            class="text-primary font-weight-medium cursor-pointer"
+            @click="goToResult(item.id)"
+            style="cursor: pointer"
+          >
             {{ item.name }}
-          </router-link>
+          </span>
         </template>
 
         <template #item.created_at="{ item }">
@@ -106,7 +110,7 @@
             variant="text"
             size="small"
             color="primary"
-            :to="{ name: 'results', params: { id: item.id } }"
+            @click="goToResult(item.id)"
           />
         </template>
       </v-data-table>
@@ -116,6 +120,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+function goToResult(id) {
+  router.push({ name: 'results', params: { id } })
+}
 import { supabase } from '../services/supabase.js'
 import { runSupabaseQuery } from '../services/supabaseQuery.js'
 import { rankGifts } from '../services/scoring.js'
