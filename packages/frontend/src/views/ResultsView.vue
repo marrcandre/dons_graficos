@@ -6,12 +6,7 @@
     </div>
 
     <!-- Erro -->
-    <v-alert
-      v-else-if="error"
-      type="error"
-      rounded="xl"
-      class="mb-4"
-    >
+    <v-alert v-else-if="error" type="error" rounded="xl" class="mb-4">
       {{ error }}
     </v-alert>
 
@@ -20,7 +15,7 @@
       <!-- Cabeçalho -->
       <div class="text-center mb-6">
         <h1 class="text-h5 font-weight-bold text-primary">
-          Resultado de {{ response.name }}
+          {{ response.name }}
         </h1>
 
         <p class="text-caption text-medium-emphasis mt-1">
@@ -29,92 +24,48 @@
       </div>
 
       <!-- Top 3 badges -->
-      <GiftBadges
-        :scores="response.scores"
-        class="mb-6"
-      />
+      <GiftBadges :scores="response.scores" class="mb-6" />
 
       <!-- Gráfico -->
-      <ResultsChart
-        ref="chartRef"
-        :scores="response.scores"
-        class="mb-6"
-      />
+      <ResultsChart ref="chartRef" :scores="response.scores" class="mb-6" />
 
       <!-- Análise IA -->
-      <AiAnalysis
-        :response-id="response.id"
-        :initial-text="response.ai_analysis"
-        class="mb-6"
-      />
+      <AiAnalysis :response-id="response.id" :initial-text="response.ai_analysis" class="mb-6" />
 
       <!-- Guia de reflexão -->
-      <ReflectionGuide class="mb-6" />
+      <ReflectionGuide class="mb-6" ref="reflectionRef" />
 
       <!-- Próximos passos -->
-      <NextStepsSection class="mb-6" />
+      <NextStepsSection class="mb-6" ref="nextStepsRef" />
 
       <!-- Recursos -->
-      <ResourcesSection class="mb-6" />
+      <ResourcesSection class="mb-6" ref="resourcesRef" />
 
       <!-- Ações do Admin -->
-      <AdminResultActions
-        v-if="authStore.isAdmin"
-        :response="response"
-        @updated="loadResponse"
-        class="mb-6"
-      />
+      <AdminResultActions v-if="authStore.isAdmin" :response="response" @updated="loadResponse" class="mb-6" />
 
       <!-- Histórico (só para o dono logado) -->
-      <HistoryList
-        v-if="isOwner"
-        :current-id="response.id"
-        class="mb-6"
-      />
-
+      <HistoryList v-if="isOwner" :current-id="response.id" class="mb-6" />
       <!-- Ações -->
-      <div class="d-flex flex-wrap gap-3 justify-center mb-6">
-        <v-btn
-          prepend-icon="mdi-file-pdf-box"
-          color="primary"
-          variant="outlined"
-          rounded="lg"
-          @click="exportPDF"
-          :loading="exportingPDF"
-        >
+      <div class="d-flex flex-wrap justify-center ga-3 mb-6">
+
+        <v-btn color="primary" variant="outlined" prepend-icon="mdi-download" @click="exportPDF"
+          :loading="exportingPDF">
           Baixar PDF
         </v-btn>
 
-        <v-btn
-          prepend-icon="mdi-share-variant"
-          color="primary"
-          variant="outlined"
-          rounded="lg"
-          @click="shareResult"
-        >
+        <v-btn color="primary" variant="outlined" prepend-icon="mdi-share-variant" @click="shareResult">
           Compartilhar
         </v-btn>
 
-        <v-btn
-          prepend-icon="mdi-printer"
-          color="primary"
-          variant="outlined"
-          rounded="lg"
-          @click="printResult"
-        >
+        <v-btn color="primary" variant="outlined" prepend-icon="mdi-printer" @click="printResult">
           Imprimir
         </v-btn>
 
-        <v-btn
-          v-if="!authStore.user"
-          prepend-icon="mdi-star-circle"
-          color="primary"
-          variant="flat"
-          rounded="lg"
-          to="/login"
-        >
+        <v-btn v-if="!authStore.user" color="primary" to="/login" prepend-icon="mdi-star">
           Quero descobrir meus dons
         </v-btn>
+
       </div>
     </template>
   </v-container>
@@ -134,8 +85,13 @@ import NextStepsSection from '../components/NextStepsSection.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
 import HistoryList from '../components/HistoryList.vue'
 import AdminResultActions from '../components/AdminResultActions.vue'
+import { resources } from '../data/resources.js'
 
 const route = useRoute()
+// Refs for PDF sections
+const reflectionRef = ref(null)
+const nextStepsRef = ref(null)
+const resourcesRef = ref(null)
 const authStore = useAuthStore()
 
 const loading = ref(true)
@@ -270,6 +226,69 @@ async function exportPDF() {
         contentW,
         Math.min(chartH, H - 70)
       )
+    }
+
+    // Capturar seções adicionais (Guia de reflexão, Próximos passos, Recursos)
+    const sections = [
+      { ref: reflectionRef, title: 'Guia de Reflexão' },
+      { ref: nextStepsRef, title: 'Próximos Passos' },
+      { ref: resourcesRef, title: 'Recursos' },
+    ]
+
+    for (const sec of sections) {
+      if (sec.ref?.value) {
+        // Render component root element (may be a Vue component)
+        const el = sec.ref.value.$el || sec.ref.value
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+        })
+        const imgData = canvas.toDataURL('image/png')
+        const imgH = (canvas.height / canvas.width) * contentW
+        pdf.addPage()
+        pdf.setFillColor(27, 84, 56)
+        pdf.rect(0, 0, W, 22, 'F')
+        pdf.setTextColor(255, 255, 255)
+        pdf.setFontSize(13)
+        pdf.setFont('helvetica', 'bold')
+        pdf.text(sec.title, margin, 14)
+        pdf.setFillColor(255, 255, 255)
+        pdf.addImage(
+          imgData,
+          'PNG',
+          margin,
+          22,
+          contentW,
+          Math.min(imgH, H - 22)
+        )
+      }
+    }
+
+    // Resources clickable links page
+    if (resources && resources.length) {
+      pdf.addPage();
+      pdf.setFillColor(27, 84, 56);
+      pdf.rect(0, 0, W, 22, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(13);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Recursos', margin, 14);
+
+      const startY = 30;
+      let curY = startY;
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 255);
+      for (const res of resources) {
+        const text = `${res.title}: ${res.subtitle}`;
+        pdf.textWithLink(text, margin, curY, { url: res.url });
+        curY += 6;
+        if (curY > H - margin) {
+          pdf.addPage();
+          curY = margin;
+        }
+      }
     }
 
     // Página da análise IA
