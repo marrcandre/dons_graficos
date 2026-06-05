@@ -1,8 +1,24 @@
 <template>
   <v-app-bar color="primary" elevation="2">
-    <v-app-bar-title>
-      <router-link to="/" class="font-weight-bold text-white text-decoration-none">Dons Espirituais</router-link>
-    </v-app-bar-title>
+    <!-- Logo + título -->
+    <router-link
+      to="/"
+      class="d-flex align-center text-decoration-none text-white ml-2"
+    >
+      <img
+        src="/favicon.svg"
+        alt="Dons Espirituais"
+        width="32"
+        height="32"
+        class="mr-3"
+      />
+
+      <span class="text-h6 font-weight-bold">
+        Dons Espirituais
+      </span>
+    </router-link>
+
+    <v-spacer />
 
     <template #append>
       <v-btn
@@ -13,6 +29,7 @@
         to="/admin"
         title="Painel Admin"
       />
+
       <v-btn
         icon="mdi-history"
         color="white"
@@ -20,17 +37,18 @@
         to="/meus-resultados"
         title="Meus resultados"
       />
-      <v-btn
-        icon="mdi-home"
-        color="white"
-        variant="text"
-        to="/"
-        title="Início"
-      />
+
       <v-menu>
         <template #activator="{ props }">
-          <v-btn icon v-bind="props" variant="text">
-            <v-avatar size="32" color="secondary">
+          <v-btn
+            icon
+            v-bind="props"
+            variant="text"
+          >
+            <v-avatar
+              size="32"
+              color="secondary"
+            >
               <img
                 v-if="avatarUrl && !avatarError"
                 :src="avatarUrl"
@@ -38,19 +56,28 @@
                 style="width:100%;height:100%;object-fit:cover;border-radius:50%"
                 @error="avatarError = true"
               />
-              <span v-else class="text-caption font-weight-bold text-white">
+
+              <span
+                v-else
+                class="text-caption font-weight-bold text-white"
+              >
                 {{ initials }}
               </span>
             </v-avatar>
           </v-btn>
         </template>
+
         <v-list>
           <v-list-item :subtitle="authStore.user?.email">
             <template #title>
-              <span class="font-weight-medium">{{ authStore.user?.user_metadata?.full_name }}</span>
+              <span class="font-weight-medium">
+                {{ authStore.user?.user_metadata?.full_name }}
+              </span>
             </template>
           </v-list-item>
+
           <v-divider />
+
           <v-list-item
             prepend-icon="mdi-logout"
             title="Sair"
@@ -70,7 +97,6 @@ const authStore = useAuthStore()
 
 const avatarError = ref(false)
 
-// Supabase pode guardar a foto do Google como avatar_url ou picture
 const avatarUrl = computed(() =>
   authStore.user?.user_metadata?.avatar_url ||
   authStore.user?.user_metadata?.picture ||
@@ -78,11 +104,21 @@ const avatarUrl = computed(() =>
   null
 )
 
-// Resetar erro ao trocar de usuário
-watch(avatarUrl, () => { avatarError.value = false })
+watch(avatarUrl, () => {
+  avatarError.value = false
+})
 
 const initials = computed(() => {
-  const name = authStore.user?.user_metadata?.full_name || authStore.profile?.name || ''
-  return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
+  const name =
+    authStore.user?.user_metadata?.full_name ||
+    authStore.profile?.name ||
+    ''
+
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
 })
 </script>
