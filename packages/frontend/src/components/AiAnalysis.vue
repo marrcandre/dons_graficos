@@ -1,79 +1,70 @@
 <template>
   <v-card rounded="xl" elevation="1" class="pa-6">
-    <h2 class="text-h6 font-weight-bold text-primary mb-2">Reflexão sobre seus dons</h2>
-    <p class="text-caption text-medium-emphasis mb-4">Análise personalizada gerada por IA</p>
+
+    <div class="d-flex align-center justify-space-between mb-4">
+
+      <div>
+        <h2 class="text-subtitle-1 font-weight-bold text-primary mb-2">
+          Seu Perfil Ministerial
+        </h2>
+
+        <p class="text-body-2 text-medium-emphasis mb-0">
+          Esta reflexão foi elaborada a partir dos resultados do seu teste e busca ajudá-lo a compreender melhor como
+          seus dons podem contribuir para a edificação da igreja e das pessoas ao seu redor.
+        </p>
+      </div>
+
+      <v-tooltip v-if="authStore.isAdmin" text="Atualizar análise">
+        <template #activator="{ props }">
+          <v-btn icon="mdi-refresh" variant="text" color="primary" v-bind="props" :loading="generating"
+            @click="generateAnalysis(true)" />
+        </template>
+      </v-tooltip>
+
+    </div>
 
     <!-- Carregando -->
     <div v-if="loading" class="text-center py-6">
       <v-progress-circular indeterminate color="primary" size="40" class="mb-3" />
+
       <p class="text-body-2 text-medium-emphasis">
-        Sua reflexão personalizada está sendo preparada...
+        Preparando seu perfil ministerial...
       </p>
     </div>
 
     <!-- Análise disponível -->
-    <div
-      v-else-if="text"
-      class="text-body-1"
-      style="line-height: 1.8; white-space: pre-wrap"
-    >
+    <div v-else-if="text" class="text-body-2" style="line-height: 1.9; white-space: pre-wrap">
       {{ text }}
     </div>
 
     <!-- Erro -->
-    <v-alert
-      v-else-if="error"
-      type="error"
-      variant="tonal"
-      rounded="lg"
-      class="text-body-2"
-    >
-      {{ error }}
-      <template #append>
-        <v-btn
-          variant="text"
-          color="error"
-          :loading="generating"
-          @click="generateAnalysis(true)"
-        >
-          Tentar novamente
-        </v-btn>
-      </template>
+    <v-alert v-else-if="error" type="error" variant="tonal" rounded="lg" class="text-body-2">
+      Não foi possível carregar seu perfil ministerial neste momento.
     </v-alert>
 
-    <!-- Sem análise disponível -->
-    <v-alert
-      v-else
-      type="info"
-      variant="tonal"
-      rounded="lg"
-      class="text-body-2"
-    >
-      A análise personalizada ainda não está disponível.
-      Clique em "Gerar agora" para criar sua reflexão personalizada.
+    <!-- Sem análise -->
+    <v-alert v-else type="info" variant="tonal" rounded="lg" class="text-body-2">
+      Seu perfil ministerial ainda está sendo preparado.
 
-      <template #append>
-        <v-btn
-          variant="text"
-          color="info"
-          :loading="generating"
-          @click="generateAnalysis(true)"
-        >
-          Gerar agora
-        </v-btn>
-      </template>
+      <br /><br />
+
+      Esta página será atualizada automaticamente assim que a análise estiver pronta.
     </v-alert>
+
   </v-card>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { supabase } from '../services/supabase.js'
+import { useAuthStore } from '../stores/auth.js'
 
 const props = defineProps({
   responseId: { type: String, required: true },
   initialText: { type: String, default: null },
 })
+
+const authStore = useAuthStore()
 
 const text = ref(props.initialText)
 const loading = ref(!props.initialText)
@@ -84,7 +75,7 @@ let subscription = null
 let pollInterval = null
 let pollAttempts = 0
 
-const MAX_POLL_ATTEMPTS = 24 // ~2 minutos a cada 5s
+const MAX_POLL_ATTEMPTS = 24 // ~2 minutos
 
 function stopPolling() {
   clearInterval(pollInterval)
@@ -108,7 +99,7 @@ async function pollForAnalysis() {
     .single()
 
   if (fetchError) {
-    console.error('Erro ao consultar análise IA:', fetchError)
+    console.error('Erro ao consultar análise:', fetchError)
   }
 
   if (data?.ai_analysis) {
@@ -146,7 +137,7 @@ async function generateAnalysis(force = false) {
 
     startPolling()
   } catch (err) {
-    console.error('Erro ao gerar análise IA:', err)
+    console.error('Erro ao gerar análise:', err)
 
     loading.value = false
 
@@ -160,8 +151,6 @@ async function generateAnalysis(force = false) {
 onMounted(() => {
   if (text.value) return
 
-  // Realtime — evento imediato quando ai_analysis é preenchido
-  // Requer REPLICA IDENTITY FULL na tabela responses
   subscription = supabase
     .channel(`response-ai-${props.responseId}`)
     .on(
@@ -184,7 +173,6 @@ onMounted(() => {
     )
     .subscribe()
 
-  // Disparar a geração automática da análise de IA (sem forçar se já existir)
   generateAnalysis(false)
 })
 

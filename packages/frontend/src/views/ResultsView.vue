@@ -1,5 +1,6 @@
 <template>
   <v-container class="py-8" max-width="800">
+
     <!-- Loading -->
     <div v-if="loading" class="text-center py-16">
       <v-progress-circular indeterminate color="primary" size="64" />
@@ -11,63 +12,121 @@
     </v-alert>
 
     <!-- Resultado -->
-    <template v-else-if="response">
-      <!-- Cabeçalho -->
-      <div class="text-center mb-6">
-        <h1 class="text-h5 font-weight-bold text-primary">
-          {{ response.name }}
-        </h1>
+<!-- Resultado -->
+<template v-else-if="response">
 
-        <p class="text-caption text-medium-emphasis mt-1">
-          {{ formatDate(response.created_at) }}
-        </p>
-      </div>
+  <!-- Cabeçalho -->
+  <div class="text-center mb-8">
+    <h1 class="text-h4 font-weight-bold text-primary mb-2">
+      {{ response.name }}
+    </h1>
 
-      <!-- Top 3 badges -->
-      <GiftBadges :scores="response.scores" class="mb-6" />
+    <p class="text-body-1 text-medium-emphasis">
+      Seu Perfil de Dons Espirituais
+    </p>
+  </div>
 
-      <!-- Gráfico -->
-      <ResultsChart ref="chartRef" :scores="response.scores" class="mb-6" />
+  <!-- Top 3 dons -->
+  <GiftBadges
+    :scores="response.scores"
+    class="mb-6"
+  />
 
-      <!-- Análise IA -->
-      <AiAnalysis :response-id="response.id" :initial-text="response.ai_analysis" class="mb-6" />
+  <!-- Gráfico -->
+  <ResultsChart
+    ref="chartRef"
+    :scores="response.scores"
+    class="mb-8"
+  />
 
-      <!-- Guia de reflexão -->
-      <ReflectionGuide class="mb-6" ref="reflectionRef" />
+  <!-- Análise IA -->
+  <v-card
+    rounded="xl"
+    elevation="1"
+    class="mb-6"
+  >
+    <AiAnalysis
+      :response-id="response.id"
+      :initial-text="response.ai_analysis"
+    />
+  </v-card>
 
-      <!-- Próximos passos -->
-      <NextStepsSection class="mb-6" ref="nextStepsRef" />
+  <!-- Crescimento -->
+  <GrowthSection
+    ref="growthRef"
+    class="mb-6"
+  />
 
-      <!-- Recursos -->
-      <ResourcesSection class="mb-6" ref="resourcesRef" />
+  <!-- Recursos -->
+  <ResourcesSection
+    ref="resourcesRef"
+    class="mb-6"
+  />
 
-      <!-- Ações do Admin -->
-      <AdminResultActions v-if="authStore.isAdmin" :response="response" @updated="loadResponse" class="mb-6" />
+  <!-- Histórico -->
+  <HistoryList
+    v-if="isOwner"
+    :current-id="response.id"
+    class="mb-6"
+  />
 
-      <!-- Histórico (só para o dono logado) -->
-      <HistoryList v-if="isOwner" :current-id="response.id" class="mb-6" />
-      <!-- Ações -->
-      <div class="d-flex flex-wrap justify-center ga-3 mb-6">
+  <!-- Ações -->
+  <v-card
+    rounded="xl"
+    variant="outlined"
+    class="mb-6 pa-4"
+  >
+    <div class="d-flex flex-wrap justify-center ga-3">
 
-        <v-btn color="primary" variant="outlined" prepend-icon="mdi-download" @click="exportPDF"
-          :loading="exportingPDF">
-          Baixar PDF
-        </v-btn>
+      <v-btn
+        color="primary"
+        variant="outlined"
+        prepend-icon="mdi-download"
+        @click="exportPDF"
+        :loading="exportingPDF"
+      >
+        Baixar PDF
+      </v-btn>
 
-        <v-btn color="primary" variant="outlined" prepend-icon="mdi-share-variant" @click="shareResult">
-          Compartilhar
-        </v-btn>
+      <v-btn
+        color="primary"
+        variant="outlined"
+        prepend-icon="mdi-share-variant"
+        @click="shareResult"
+      >
+        Compartilhar
+      </v-btn>
 
-        <v-btn color="primary" variant="outlined" prepend-icon="mdi-printer" @click="printResult">
-          Imprimir
-        </v-btn>
+      <v-btn
+        color="primary"
+        variant="outlined"
+        prepend-icon="mdi-printer"
+        @click="printResult"
+      >
+        Imprimir
+      </v-btn>
 
-        <v-btn v-if="!authStore.user" color="primary" to="/login" prepend-icon="mdi-star">
-          Quero descobrir meus dons
-        </v-btn>
+      <v-btn
+        v-if="!authStore.user"
+        color="primary"
+        prepend-icon="mdi-gift-outline"
+        to="/login"
+      >
+        Quero descobrir meus dons
+      </v-btn>
 
-      </div>
-    </template>
+    </div>
+  </v-card>
+
+  <!-- Data -->
+  <div class="text-center">
+    <p class="text-caption text-medium-emphasis">
+      Teste realizado em {{ formatDate(response.created_at) }}
+    </p>
+  </div>
+
+</template>
+
   </v-container>
 </template>
 
@@ -77,20 +136,17 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { supabase } from '../services/supabase.js'
 
+import GrowthSection from '../components/GrowthSection.vue'
 import GiftBadges from '../components/GiftBadges.vue'
 import ResultsChart from '../components/ResultsChart.vue'
 import AiAnalysis from '../components/AiAnalysis.vue'
-import ReflectionGuide from '../components/ReflectionGuide.vue'
-import NextStepsSection from '../components/NextStepsSection.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
 import HistoryList from '../components/HistoryList.vue'
-import AdminResultActions from '../components/AdminResultActions.vue'
 import { resources } from '../data/resources.js'
 
 const route = useRoute()
 // Refs for PDF sections
-const reflectionRef = ref(null)
-const nextStepsRef = ref(null)
+const growthRef = ref(null)
 const resourcesRef = ref(null)
 const authStore = useAuthStore()
 
@@ -230,8 +286,7 @@ async function exportPDF() {
 
     // Capturar seções adicionais (Guia de reflexão, Próximos passos, Recursos)
     const sections = [
-      { ref: reflectionRef, title: 'Guia de Reflexão' },
-      { ref: nextStepsRef, title: 'Próximos Passos' },
+      { ref: growthRef, title: 'Reflexão e Crescimento' },
       { ref: resourcesRef, title: 'Recursos' },
     ]
 

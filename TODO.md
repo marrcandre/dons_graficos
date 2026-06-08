@@ -27,21 +27,16 @@ Primeira dobra (sem rolagem)
 
 Segunda seção
 
-- [ ] Criar resumo curto da análise IA (3 a 5 linhas)
-- [ ] Destacar os principais insights
-
-Terceira seção
-
 - [ ] Exibir análise completa da IA
 - [ ] Avaliar exibição recolhida/expansível
 
-Quarta seção
+Terceira seção
 
 - [ ] Agrupar reflexão e crescimento espiritual
 - [ ] Integrar perguntas de reflexão
 - [ ] Integrar próximos passos
 
-Quinta seção
+Quarta seção
 
 - [ ] Exibir recursos recomendados
 
