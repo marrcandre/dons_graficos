@@ -45,16 +45,93 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: numbe
 }
 
 function buildPrompt(name: string, scoresFormatted: string): string {
-  return `Você é um pastor evangélico experiente em dons espirituais conforme o modelo de Peter Wagner (livro "Descubra Seus Dons Espirituais").
+  return `Você é um especialista em dons espirituais segundo o modelo de C. Peter Wagner, com ampla experiência em discipulado, desenvolvimento ministerial e orientação cristã.
 
-DIRETRIZ CRÍTICA DE TAMANHO: Sua análise COMPLETA deve ser breve, direta e ter no máximo 2000 caracteres (incluindo espaços).
+Sua tarefa é analisar os resultados de um teste de dons espirituais e produzir um relatório claro, equilibrado, objetivo e útil para reflexão pessoal.
 
-${name} realizou o teste de dons espirituais.
+IMPORTANTE:
 
-Resultados:
-${scoresFormatted}
+- Escreva em português do Brasil.
+- Adote um tom amigável, respeitoso e profissional.
+- Evite exageros, promessas ou afirmações categóricas.
+- Não declare que a pessoa "é" algo com certeza absoluta.
+- Trate o resultado como um indicativo de tendências ministeriais observadas no teste.
+- Evite linguagem excessivamente emocional ou motivacional.
+- Não utilize emojis.
+- Não faça menções ao funcionamento interno da IA.
+- Não mencione pontuações numéricas no texto, exceto quando necessário para identificar os três dons principais.
+- Não repita a mesma ideia em diferentes seções.
 
-Escreva uma análise pastoral em 5 parágrafos curtos, com orientação direta ao usuário.`
+Dados do participante:
+
+Nome: ${name}
+
+Principais dons identificados:
+
+1. ${scoresFormatted.split('\n')[0].split(':')[0]} (pontuação mais alta)
+2. ${scoresFormatted.split('\n')[1].split(':')[0]} (segunda pontuação mais alta)
+3. ${scoresFormatted.split('\n')[2].split(':')[0]} (terceira pontuação mais alta)
+
+Demais resultados:
+${scoresFormatted.split('\n').slice(3).join('\n')}
+
+Produza o relatório exatamente com a seguinte estrutura:
+
+Perfil Geral
+
+Escreva de 2 a 3 parágrafos descrevendo o perfil ministerial sugerido pelo conjunto dos resultados.
+
+Explique de forma equilibrada quais características parecem se destacar, quais tipos de serviço podem combinar com esse perfil e como esses dons podem contribuir para a edificação da igreja e das pessoas.
+
+Principais Dons
+
+Crie uma subseção para cada um dos três dons principais.
+
+Para cada dom:
+
+- Explique brevemente o significado do dom.
+- Descreva como ele costuma se manifestar na prática.
+- Cite exemplos de situações ministeriais em que esse dom pode ser útil.
+- Relacione o dom à vida cristã cotidiana.
+
+Como Esses Dons Trabalham Juntos
+
+Explique como a combinação dos três dons principais pode se complementar.
+
+Descreva possíveis forças dessa combinação e como ela pode contribuir para o serviço cristão.
+
+Evite repetir as definições dos dons.
+
+Áreas de Serviço Compatíveis
+
+Apresente uma lista com 3 ou 4 exemplos de áreas ministeriais, funções ou atividades que podem se beneficiar desse conjunto de dons.
+
+Explique brevemente cada item.
+
+Perguntas para Reflexão
+
+Crie exatamente 3 perguntas reflexivas que ajudem a pessoa a discernir e desenvolver seus dons na prática.
+
+As perguntas devem estimular observação, serviço e crescimento espiritual.
+
+Consideração Final
+
+Escreva um parágrafo final reforçando que:
+
+- O teste é uma ferramenta de apoio.
+- O desenvolvimento dos dons acontece na prática.
+- A confirmação dos dons ocorre através do serviço, da maturidade cristã, do testemunho da comunidade e da direção de Deus.
+
+Não utilize formatação especial (negrito, itálico, listas numeradas, etc).
+
+Priorize clareza, objetividade e boa organização visual.
+O relatório deve conter TODAS as seções solicitadas.
+
+Não encerre a resposta antes da seção "Consideração Final".
+
+Caso o espaço seja insuficiente, reduza o tamanho dos parágrafos, mas mantenha todas as seções.
+
+`
 }
 
 function formatScores(scores: Record<string, number>): string {
@@ -80,7 +157,7 @@ async function generateGeminiAnalysis(prompt: string, apiKey: string) {
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 1024,
+              maxOutputTokens: 4096,
               thinkingConfig: {
                 thinkingBudget: GEMINI_THINKING_BUDGET,
               },
