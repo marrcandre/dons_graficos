@@ -4,14 +4,9 @@
     <div class="d-flex align-center justify-space-between mb-4">
 
       <div>
-        <h2 class="text-subtitle-1 font-weight-bold text-primary mb-2">
-          Seu Perfil Ministerial
+        <h2 class="text-subtitle-1 font-weight-bold text-primary mb-0">
+          Análise dos seus dons
         </h2>
-
-        <p class="text-body-2 text-medium-emphasis mb-0">
-          Esta reflexão foi elaborada a partir dos resultados do seu teste e busca ajudá-lo a compreender melhor como
-          seus dons podem contribuir para a edificação da igreja e das pessoas ao seu redor.
-        </p>
       </div>
 
       <v-tooltip v-if="authStore.isAdmin" text="Atualizar análise">
@@ -28,7 +23,7 @@
       <v-progress-circular indeterminate color="primary" size="40" class="mb-3" />
 
       <p class="text-body-2 text-medium-emphasis">
-        Preparando seu perfil ministerial...
+        Preparando a análise...
       </p>
     </div>
 
@@ -39,12 +34,12 @@
 
     <!-- Erro -->
     <v-alert v-else-if="error" type="error" variant="tonal" rounded="lg" class="text-body-2">
-      Não foi possível carregar seu perfil ministerial neste momento.
+      Não foi possível carregar a análise neste momento.
     </v-alert>
 
     <!-- Sem análise -->
     <v-alert v-else type="info" variant="tonal" rounded="lg" class="text-body-2">
-      Seu perfil ministerial ainda está sendo preparado.
+      A análise ainda está sendo preparada.
 
       <br /><br />
 
