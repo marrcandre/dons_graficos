@@ -4,11 +4,22 @@ import App from './App.vue'
 import router from './router/index.js'
 import './assets/variables.css'
 import vuetify from './plugins/vuetify.js'
+import { useAuthStore } from './stores/auth.js'
 
 const app = createApp(App)
 
-app.use(createPinia())
-app.use(router)
-app.use(vuetify)
+const pinia = createPinia()
+app.use(pinia)
 
-app.mount('#app')
+const auth = useAuthStore()
+
+// 🔥 inicializa auth antes do app montar (SEGURADO)
+auth.init()
+  .catch((err) => {
+    console.error('Erro ao inicializar auth:', err)
+  })
+  .finally(() => {
+    app.use(router)
+    app.use(vuetify)
+    app.mount('#app')
+  })

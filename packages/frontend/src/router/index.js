@@ -30,7 +30,7 @@ const routes = [
     path: '/results/:id',
     name: 'results',
     component: () => import('../views/ResultsView.vue'),
-    meta: { public: true }, // público por link; UUID é a segurança
+    meta: { public: true },
   },
   {
     path: '/admin',
@@ -38,6 +38,12 @@ const routes = [
     component: () => import('../views/AdminView.vue'),
     meta: { requiresAdmin: true },
   },
+  {
+    path: '/auth/callback',
+    name: 'auth-callback',
+    component: () => import('../views/AuthCallback.vue'),
+    meta: { public: true },
+  }
 ]
 
 const router = createRouter({
@@ -49,28 +55,33 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
-  const needsAuthState = to.meta.requiresAuth || to.meta.requiresAdmin || to.name === 'login'
-
-  // Rotas públicas, como /results/:id, não devem ficar bloqueadas pelo Auth.
-  if (!authStore.initialized && !needsAuthState) {
-    authStore.init().catch((err) => console.error('Erro ao inicializar autenticação:', err))
+  // ✅ 1. SEMPRE aguarda inicialização (sem exceções)
+  if (!authStore.initialized) {
+    try {
+      await authStore.init()
+      if (to.meta.requiresAuth && !authStore.user) {
+        return { name: 'login' }
+      }
+    } catch (err) {
+      console.error('Erro ao inicializar autenticação:', err)
+    }
   }
 
-  if (!authStore.initialized && needsAuthState) {
-    await authStore.init()
+  const isAuthRoute = to.meta.requiresAuth || to.meta.requiresAdmin
+
+  // ❌ login com usuário logado → home
+  if (to.name === 'login' && authStore.user) {
+    return { name: 'home' }
   }
 
-  if (to.meta.requiresAdmin) {
-    if (!authStore.user) return { name: 'login' }
-    if (!authStore.isAdmin) return { name: 'home' }
-  }
-
-  if (to.meta.requiresAuth && !authStore.user) {
+  // 🔒 precisa login
+  if (isAuthRoute && !authStore.user) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  if (to.name === 'login' && authStore.user) {
-    return { name: 'home' }
+  // 🔐 admin
+  if (to.meta.requiresAdmin) {
+    if (!authStore.isAdmin) return { name: 'home' }
   }
 })
 
