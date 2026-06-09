@@ -72,7 +72,7 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Exportação PDF.
 * Gráfico de dons espirituais.
 * Recursos complementares.
-* Autoavanço do questionário.
+* Autoavanço do teste.
 
 ### Administração
 
@@ -105,7 +105,7 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 ### Funcionalidades
 
 * Aplicação inicial do teste de dons espirituais.
-* Questionário completo.
+* Teste completo.
 * Cálculo dos dons.
 * Exibição dos resultados.
 * Geração de gráficos.

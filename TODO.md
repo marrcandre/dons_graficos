@@ -34,7 +34,7 @@
 
 ### Fluxo ideal
 
-Questionário → Resultado → IA → E-mail → Visualização
+Teste → Resultado → IA → E-mail → Visualização
 
 ### Tarefas
 
