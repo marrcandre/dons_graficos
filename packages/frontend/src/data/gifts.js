@@ -1,4 +1,4 @@
-// 27 dons espirituais — ordem conforme o questionário Wagner
+// 27 dons espirituais — ordem conforme o Teste de Dons Espirituais de C. Peter Wagner
 // Índice i → dom que a questão i mede (questão i % 27)
 
 export const gifts = [

@@ -1,6 +1,9 @@
 <template>
   <v-card rounded="xl" elevation="1" class="pa-4">
-    <h2 class="text-subtitle-1 font-weight-bold text-primary mb-4">Pontuação por dom</h2>
+    <h2 class="text-h6 font-weight-bold text-primary mb-4 d-flex align-center">
+      <v-icon icon="mdi-chart-bar" class="mr-2" />
+      Pontuação por dom
+    </h2>
     <div ref="chartWrapperEl" style="position: relative; height: 520px">
       <Bar :data="chartData" :options="chartOptions" :plugins="chartPlugins" />
     </div>

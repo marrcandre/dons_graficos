@@ -1,23 +1,20 @@
 <template>
   <v-app-bar color="primary" elevation="2">
     <!-- Logo + título -->
-    <router-link
-      to="/"
-      class="d-flex align-center text-decoration-none text-white ml-2"
-    >
-      <img
-        src="/favicon.svg"
-        alt="Dons Espirituais"
-        width="32"
-        height="32"
-        class="mr-3"
-      />
+<router-link
+  to="/"
+  class="d-flex align-center text-decoration-none text-white ml-2"
+>
+<v-icon
+  icon="mdi-gift-outline"
+  size="30"
+  class="mr-3"
+/>
 
-      <span class="text-h6 font-weight-bold">
-        Dons Espirituais
-      </span>
-    </router-link>
-
+  <span class="text-h6 font-weight-bold">
+    Dons Espirituais
+  </span>
+</router-link>
     <v-spacer />
 
     <template #append>

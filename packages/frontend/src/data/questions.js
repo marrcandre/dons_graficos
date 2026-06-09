@@ -1,4 +1,4 @@
-// 135 perguntas do Questionário Wagner Modificado
+// 135 perguntas do Teste de C. Peter Wagner Modificado
 // Cada pergunta[i] mede o dom gifts[i % 27]
 // Escala de resposta: 0 = Raramente/Nunca, 1 = Às vezes, 2 = Frequentemente, 3 = Muito frequentemente
 

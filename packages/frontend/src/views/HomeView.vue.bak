@@ -4,7 +4,7 @@
     <!-- Cabeçalho -->
     <div class="text-center mb-8">
 
-      <h1 class="text-h4 font-weight-bold text-primary d-flex justify-center align-center mb-4">
+      <h1 class="text-h4 font-weight-bold text-primary d-flex justify-center align-center mb-3">
         <v-icon icon="mdi-gift-outline" size="40" class="mr-3" />
         Descubra seus dons espirituais
       </h1>
@@ -25,12 +25,12 @@
     class="mr-2"
   />
 
-  <p class="text-h6 font-weight-bold text-primary mb-2">
+  <p class="text-h6 font-weight-bold text-primary mb-0">
     Histórico de resultados
   </p>
 </div>
 
-        <p class="text-body-2 text-medium-emphasis mb-2">
+        <p class="text-body-2 text-medium-emphasis mb-0">
           Veja seus resultados e análises anteriores.
         </p>
       </div>
@@ -49,12 +49,12 @@
     class="mr-2"
   />
 
-  <p class="text-h6 font-weight-bold text-primary mb-2">
+  <p class="text-h6 font-weight-bold text-primary mb-0">
     Sobre o teste
   </p>
 </div>
 
-      <p class="text-body-1 mb-4">
+      <p class="text-body-1 mb-3">
         Este teste é baseado no modelo de
         <strong>C. Peter Wagner</strong>
         e avalia
@@ -78,12 +78,12 @@
     class="mr-2"
   />
 
-  <p class="text-h6 font-weight-bold text-primary mb-2">
+  <p class="text-h6 font-weight-bold text-primary mb-0">
     Preparação para o teste
   </p>
 </div>
 
-      <p class="text-h6 font-weight-medium mb-4">
+      <p class="text-h6 font-weight-medium mb-3">
         Como responder
       </p>
 
@@ -100,7 +100,7 @@
 
       <v-divider class="mb-4" />
 
-      <p class="text-h6 font-weight-medium mb-4">
+      <p class="text-h6 font-weight-medium mb-3">
         Antes de começar, reflita:
       </p>
 
@@ -118,7 +118,7 @@
         Descobrir meus dons
       </v-btn>
 
-      <p class="text-body-2 text-medium-emphasis mt-4">
+      <p class="text-body-2 text-medium-emphasis mt-3">
         Responda no seu ritmo. Seu progresso será salvo automaticamente.
       </p>
     </div>

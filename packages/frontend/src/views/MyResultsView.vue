@@ -2,13 +2,8 @@
   <v-container class="py-8" max-width="900">
     <div class="d-flex align-center justify-space-between mb-6">
       <h1 class="text-h5 font-weight-bold text-primary">Meus resultados</h1>
-      <v-btn
-        color="primary"
-        variant="flat"
-        rounded="lg"
-        prepend-icon="mdi-play-circle"
-        to="/quiz"
-      >
+      <v-btn color="primary" size="large" rounded="xl" prepend-icon="mdi-play-circle" to="/quiz" min-width="220"
+        class="text-none">
         Novo teste
       </v-btn>
     </div>
@@ -17,13 +12,7 @@
       <v-progress-circular indeterminate color="primary" size="48" />
     </div>
 
-    <v-alert
-      v-else-if="error"
-      type="error"
-      variant="tonal"
-      rounded="xl"
-      class="mb-4"
-    >
+    <v-alert v-else-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
       {{ error }}
       <template #append>
         <v-btn variant="text" color="error" @click="loadResults">Tentar novamente</v-btn>
@@ -33,7 +22,8 @@
     <v-card v-else-if="rows.length === 0" rounded="xl" elevation="1" class="pa-8 text-center">
       <v-icon size="56" color="grey-lighten-1" class="mb-4">mdi-clipboard-text-outline</v-icon>
       <p class="text-body-1 text-medium-emphasis mb-4">Você ainda não fez nenhum teste.</p>
-      <v-btn color="primary" variant="flat" rounded="lg" prepend-icon="mdi-play-circle" to="/quiz">
+      <v-btn color="primary" size="large" rounded="xl" prepend-icon="mdi-play-circle" to="/quiz" min-width="180"
+        class="text-none">
         Fazer o primeiro teste
       </v-btn>
     </v-card>
@@ -60,18 +50,10 @@
 
             <template #append>
               <div class="d-flex flex-column align-end gap-1 mr-2">
-                <v-chip
-                  :color="item.ai_analysis ? 'success' : 'warning'"
-                  size="x-small"
-                  variant="tonal"
-                >
+                <v-chip :color="item.ai_analysis ? 'success' : 'warning'" size="x-small" variant="tonal">
                   {{ item.ai_analysis ? 'Análise pronta' : 'Análise pendente' }}
                 </v-chip>
-                <v-chip
-                  :color="item.email_sent ? 'success' : 'grey'"
-                  size="x-small"
-                  variant="tonal"
-                >
+                <v-chip :color="item.email_sent ? 'success' : 'grey'" size="x-small" variant="tonal">
                   {{ item.email_sent ? 'Email enviado' : 'Email pendente' }}
                 </v-chip>
               </div>

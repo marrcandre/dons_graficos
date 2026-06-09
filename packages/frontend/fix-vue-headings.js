@@ -9,8 +9,8 @@ const ROOT_DIR = path.join(__dirname, "src");
 
 // regras de correção
 const replacements = [
-  { from: /text-h6/g, to: "text-h6" },
-  { from: /text-h6/g, to: "text-h6" },
+  { from: /text-subtitle-1/g, to: "text-h6" },
+  { from: /text-subtitle-2/g, to: "text-h6" },
 ];
 
 // pega arquivos vue recursivamente

@@ -7,7 +7,7 @@
     class="mr-2"
   />
 
-  <h2 class="text-h6 font-weight-bold text-primary mb-2">
+  <h2 class="text-h6 font-weight-bold text-primary mb-0">
     Seus testes anteriores
   </h2>
 </div>
@@ -18,7 +18,7 @@
 
     <v-list v-else-if="history.length" lines="two">
       <v-list-item v-for="item in history" :key="item.id" :to="{ name: 'results', params: { id: item.id } }"
-        :class="item.id === currentId ? 'bg-primary-lighten-5' : ''" rounded="lg" class="mb-2">
+        :class="item.id === currentId ? 'bg-primary-lighten-5' : ''" rounded="lg" class="mb-1">
         <template #title>
           <span class="font-weight-medium">{{ formatDate(item.created_at) }}</span>
           <v-chip v-if="item.id === currentId" size="x-small" color="primary" class="ml-2">atual</v-chip>

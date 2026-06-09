@@ -4,7 +4,7 @@
     <v-dialog v-model="showResumeDialog" max-width="440" persistent>
       <v-card rounded="xl" class="pa-4">
         <v-card-title class="text-h6 font-weight-bold text-primary">
-          Questionário em andamento
+          Teste em andamento
         </v-card-title>
         <v-card-text>
           Você tem <strong>{{ quizStore.savedAnswerCount }} de 135</strong> respostas salvas.
@@ -23,7 +23,7 @@
       @submit="handleUserInfoSubmit"
     />
 
-    <!-- Etapa 2: Questionário -->
+    <!-- Etapa 2: Teste -->
     <template v-else-if="step === 'quiz'">
       <QuizProgress :progress="quizStore.progress" :current="quizStore.currentIndex + 1" :total="quizStore.totalQuestions" />
       <QuestionStep
