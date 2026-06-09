@@ -1,77 +1,178 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+<template>
+  <v-card rounded="xl" elevation="1" class="pa-6">
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+    <div class="d-flex align-center justify-space-between mb-4">
 
-const ROOT_DIR = path.join(__dirname, "src");
+      <div>
+        <h2 class="text-subtitle-1 font-weight-bold text-primary mb-0">
+          Análise dos seus dons
+        </h2>
+      </div>
 
-// regras de correção
-const replacements = [
-  { from: /text-h6/g, to: "text-h6" },
-  { from: /text-h6/g, to: "text-h6" },
-];
+      <v-tooltip v-if="authStore.isAdmin" text="Atualizar análise">
+        <template #activator="{ props }">
+          <v-btn icon="mdi-refresh" variant="text" color="primary" v-bind="props" :loading="generating"
+            @click="generateAnalysis(true)" />
+        </template>
+      </v-tooltip>
 
-// pega arquivos vue recursivamente
-function getVueFiles(dir) {
-  let results = [];
+    </div>
 
-  const list = fs.readdirSync(dir);
+    <!-- Carregando -->
+    <div v-if="loading" class="text-center py-6">
+      <v-progress-circular indeterminate color="primary" size="40" class="mb-3" />
 
-  list.forEach((file) => {
-    const fullPath = path.join(dir, file);
-    const stat = fs.statSync(fullPath);
+      <p class="text-body-2 text-medium-emphasis">
+        Preparando a análise...
+      </p>
+    </div>
 
-    if (stat.isDirectory()) {
-      results = results.concat(getVueFiles(fullPath));
-    } else if (file.endsWith(".vue")) {
-      results.push(fullPath);
-    }
-  });
+    <!-- Análise disponível -->
+    <div v-else-if="text" class="text-body-2" style="line-height: 1.9; white-space: pre-wrap">
+      {{ text }}
+    </div>
 
-  return results;
+    <!-- Erro -->
+    <v-alert v-else-if="error" type="error" variant="tonal" rounded="lg" class="text-body-2">
+      Não foi possível carregar a análise neste momento.
+    </v-alert>
+
+    <!-- Sem análise -->
+    <v-alert v-else type="info" variant="tonal" rounded="lg" class="text-body-2">
+      A análise ainda está sendo preparada.
+
+      <br /><br />
+
+      Esta página será atualizada automaticamente assim que a análise estiver pronta.
+    </v-alert>
+
+  </v-card>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import { supabase } from '../services/supabase.js'
+import { useAuthStore } from '../stores/auth.js'
+
+const props = defineProps({
+  responseId: { type: String, required: true },
+  initialText: { type: String, default: null },
+})
+
+const authStore = useAuthStore()
+
+const text = ref(props.initialText)
+const loading = ref(!props.initialText)
+const generating = ref(false)
+const error = ref(null)
+
+let subscription = null
+let pollInterval = null
+let pollAttempts = 0
+
+const MAX_POLL_ATTEMPTS = 24 // ~2 minutos
+
+function stopPolling() {
+  clearInterval(pollInterval)
+  pollInterval = null
 }
 
-function processFile(filePath, dryRun = false) {
-  const content = fs.readFileSync(filePath, "utf8");
-  let updated = content;
+function startPolling() {
+  stopPolling()
+  pollAttempts = 0
+  pollForAnalysis()
+  pollInterval = setInterval(pollForAnalysis, 5000)
+}
 
-  replacements.forEach(({ from, to }) => {
-    updated = updated.replace(from, to);
-  });
+async function pollForAnalysis() {
+  pollAttempts++
 
-  if (updated !== content) {
-    console.log(`\n🟡 ${filePath}`);
+  const { data, error: fetchError } = await supabase
+    .from('responses')
+    .select('ai_analysis')
+    .eq('id', props.responseId)
+    .single()
 
-    replacements.forEach(({ from }) => {
-      const matches = (content.match(from) || []).length;
-      if (matches > 0) {
-        console.log(`   - ${from} → ${matches} ocorrência(s)`);
-      }
-    });
+  if (fetchError) {
+    console.error('Erro ao consultar análise:', fetchError)
+  }
 
-    if (!dryRun) {
-      fs.writeFileSync(filePath + ".bak", content, "utf8");
-      fs.writeFileSync(filePath, updated, "utf8");
-      console.log("   ✔ aplicado");
-    } else {
-      console.log("   👀 dry-run (sem alterações)");
-    }
+  if (data?.ai_analysis) {
+    text.value = data.ai_analysis
+    loading.value = false
+    error.value = null
+
+    stopPolling()
+    subscription?.unsubscribe()
+  } else if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+    loading.value = false
+    stopPolling()
   }
 }
 
-function run() {
-  const dryRun = process.argv.includes("--dry-run");
+async function generateAnalysis(force = false) {
+  generating.value = true
+  loading.value = true
+  error.value = null
 
-  const files = getVueFiles(ROOT_DIR);
+  try {
+    const { error: invokeError } = await supabase.functions.invoke(
+      'generate-ai',
+      {
+        body: {
+          responseId: props.responseId,
+          force,
+        },
+      }
+    )
 
-  console.log(`🔍 Analisando ${files.length} arquivos Vue...`);
-  console.log(dryRun ? "🧪 Modo DRY-RUN ativado\n" : "⚡ Modo EXECUÇÃO\n");
+    if (invokeError) {
+      throw invokeError
+    }
 
-  files.forEach((file) => processFile(file, dryRun));
+    startPolling()
+  } catch (err) {
+    console.error('Erro ao gerar análise:', err)
 
-  console.log("\n✅ Finalizado");
+    loading.value = false
+
+    error.value =
+      'Não foi possível gerar a análise agora. Tente novamente em instantes.'
+  } finally {
+    generating.value = false
+  }
 }
 
-run();
+onMounted(() => {
+  if (text.value) return
+
+  subscription = supabase
+    .channel(`response-ai-${props.responseId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'responses',
+        filter: `id=eq.${props.responseId}`,
+      },
+      (payload) => {
+        if (payload.new?.ai_analysis) {
+          text.value = payload.new.ai_analysis
+          loading.value = false
+          error.value = null
+
+          stopPolling()
+        }
+      }
+    )
+    .subscribe()
+
+  generateAnalysis(false)
+})
+
+onUnmounted(() => {
+  subscription?.unsubscribe()
+  stopPolling()
+})
+</script>
