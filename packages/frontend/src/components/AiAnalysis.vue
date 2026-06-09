@@ -4,7 +4,7 @@
     <div class="d-flex align-center justify-space-between mb-4">
 
       <div>
-        <h2 class="text-subtitle-1 font-weight-bold text-primary mb-0">
+        <h2 class="text-h6 font-weight-bold text-primary mb-0"> 
           Análise dos seus dons
         </h2>
       </div>
@@ -22,7 +22,7 @@
     <div v-if="loading" class="text-center py-6">
       <v-progress-circular indeterminate color="primary" size="40" class="mb-3" />
 
-      <p class="text-body-2 text-medium-emphasis">
+      <p class="text-body-2 text-medium-emphasis mt-2">
         Preparando a análise...
       </p>
     </div>
