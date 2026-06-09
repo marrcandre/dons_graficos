@@ -39,3 +39,9 @@ Instalar as dependências do projeto: após criar o ambiente virtual, execute o 
 Executar o projeto: para executar o projeto, basta executar o comando pdm run python nome_do_arquivo.py, substituindo "nome_do_arquivo.py" pelo nome do arquivo Python que deseja executar.
 
 Com esses passos, você será capaz de baixar e executar o projeto em seu ambiente local. Certifique-se de ter as configurações corretas para executar o projeto e de ler a documentação do projeto para entender melhor como usá-lo.
+
+## 🗄️ Banco de Dados
+
+Scripts e rotinas SQL do projeto:
+
+👉 [README_SQL.md](./README_SQL.md)
