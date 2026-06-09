@@ -19,7 +19,7 @@
       </template>
     </v-alert>
 
-    <v-card v-else-if="rows.length === 0" rounded="xl" elevation="2" class="pa-8 text-center">
+    <v-card v-else-if="rows.length === 0" rounded="xl" elevation="1" class="pa-8 text-center">
       <v-icon size="56" color="grey-lighten-1" class="mb-4">mdi-clipboard-text-outline</v-icon>
       <p class="text-body-1 text-medium-emphasis mb-4">Você ainda não fez nenhum teste.</p>
       <v-btn color="primary" size="large" rounded="xl" prepend-icon="mdi-play-circle" to="/quiz" min-width="180"
@@ -28,7 +28,7 @@
       </v-btn>
     </v-card>
 
-    <v-card v-else rounded="xl" elevation="2">
+    <v-card v-else rounded="xl" elevation="1">
       <v-list lines="two">
         <template v-for="(item, i) in rows" :key="item.id">
           <v-divider v-if="i > 0" />
@@ -119,13 +119,3 @@ function topGift(scores) {
   return rankGifts(scores)[0]?.gift.name ?? '—'
 }
 </script>
-
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

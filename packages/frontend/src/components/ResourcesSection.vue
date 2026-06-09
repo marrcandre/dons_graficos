@@ -1,5 +1,5 @@
 <template>
-  <v-card rounded="xl" elevation="1" class="pa-6">
+  <v-card rounded="xl" elevation="2" class="pa-6">
 <div class="d-flex align-center mb-4">
   <v-icon
     icon="mdi-bookshelf"
@@ -45,5 +45,15 @@ import { resources } from '../data/resources.js'
 .resource-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+</style>
+
+
+<style scoped>
+.v-card {
+  transition: all 0.2s ease;
+}
+.v-card:hover {
+  transform: translateY(-2px);
 }
 </style>

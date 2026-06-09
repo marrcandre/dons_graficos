@@ -181,13 +181,3 @@ async function submitQuiz() {
   }
 }
 </script>
-
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

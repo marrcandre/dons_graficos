@@ -6,10 +6,10 @@
 
     <v-form ref="formRef" @submit.prevent="handleSubmit">
       <v-text-field v-model="form.name" label="Nome completo" variant="outlined" rounded="lg" :rules="[required]"
-        prepend-inner-icon="mdi-account" class="mb-3" autofocus />
+        prepend-inner-icon="mdi-account" class="mb-4" autofocus />
 
       <v-text-field v-model="form.gp" label="Grupo Pequeno (nome do apascentador)" variant="outlined" rounded="lg"
-        prepend-inner-icon="mdi-account-group" class="mb-3" hint="Pode deixar em branco se não souber"
+        prepend-inner-icon="mdi-account-group" class="mb-4" hint="Pode deixar em branco se não souber"
         persistent-hint />
 
       <v-text-field v-model="form.age" label="Idade" variant="outlined" rounded="lg" type="number" :rules="[ageRule]"

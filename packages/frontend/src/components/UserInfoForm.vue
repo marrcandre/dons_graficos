@@ -47,3 +47,13 @@ async function handleSubmit() {
   emit('submit', { ...form.value })
 }
 </script>
+
+
+<style scoped>
+.v-card {
+  transition: all 0.2s ease;
+}
+.v-card:hover {
+  transform: translateY(-2px);
+}
+</style>

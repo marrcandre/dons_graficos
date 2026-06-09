@@ -15,7 +15,7 @@
     </div>
 
     <!-- Filtros -->
-    <v-card rounded="xl" elevation="2" class="pa-4 mb-4">
+    <v-card rounded="xl" elevation="1" class="pa-4 mb-4">
       <div class="d-flex gap-3 flex-wrap">
         <v-text-field
           v-model="search"
@@ -65,7 +65,7 @@
       </template>
     </v-alert>
 
-    <v-card rounded="xl" elevation="2">
+    <v-card rounded="xl" elevation="1">
       <v-data-table
         :headers="headers"
         :items="filteredRows"
@@ -233,13 +233,3 @@ function exportCSV() {
   exporting.value = false
 }
 </script>
-
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

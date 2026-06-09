@@ -16,7 +16,7 @@
     </div>
 
     <!-- Histórico -->
-    <v-card v-if="hasHistory" rounded="xl" class="mb-6 pa-5 d-flex align-center justify-space-between" elevation="1">
+    <v-card v-if="hasHistory" rounded="xl" class="mb-6 pa-5 d-flex align-center justify-space-between" elevation="2">
       <div>
 <div class="d-flex align-center mb-4">
   <v-icon
@@ -41,7 +41,7 @@
     </v-card>
 
     <!-- Sobre o teste -->
-    <v-card rounded="xl" class="mb-6 pa-5" elevation="1">
+    <v-card rounded="xl" class="mb-6 pa-5" elevation="2">
 <div class="d-flex align-center mb-4">
   <v-icon
     icon="mdi-information-outline"
@@ -70,7 +70,7 @@
     </v-card>
 
     <!-- Preparação -->
-    <v-card rounded="xl" class="mb-6 pa-5" elevation="1">
+    <v-card rounded="xl" class="mb-6 pa-5" elevation="2">
 <div class="d-flex align-center mb-4">
   <v-icon
     icon="mdi-lightbulb-outline"
@@ -151,3 +151,13 @@ const reflectionQuestions = [
   'Que tipo de necessidade no corpo de Cristo mais te move a agir?',
 ]
 </script>
+
+
+<style scoped>
+.v-card {
+  transition: all 0.2s ease;
+}
+.v-card:hover {
+  transform: translateY(-2px);
+}
+</style>

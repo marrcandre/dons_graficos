@@ -1,5 +1,5 @@
 <template>
-    <v-card rounded="xl" elevation="1" class="pa-6">
+    <v-card rounded="xl" elevation="2" class="pa-6">
         <div class="d-flex align-center mb-4">
             <v-icon icon="mdi-sprout" color="primary" class="mr-2" />
 
@@ -71,3 +71,13 @@
 
     </v-card>
 </template>
+
+
+<style scoped>
+.v-card {
+  transition: all 0.2s ease;
+}
+.v-card:hover {
+  transform: translateY(-2px);
+}
+</style>
