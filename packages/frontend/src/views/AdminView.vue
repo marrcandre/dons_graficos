@@ -2,63 +2,23 @@
   <v-container class="py-8" max-width="1200">
     <div class="d-flex align-center justify-space-between mb-6">
       <h1 class="text-h5 font-weight-bold text-primary">Painel Admin</h1>
-      <v-btn
-        prepend-icon="mdi-download"
-        color="primary"
-        variant="outlined"
-        rounded="lg"
-        :loading="exporting"
-        @click="exportCSV"
-      >
-        Exportar CSV
-      </v-btn>
     </div>
 
     <!-- Filtros -->
     <v-card rounded="xl" elevation="2" class="pa-4 mb-4">
       <div class="d-flex gap-3 flex-wrap">
-        <v-text-field
-          v-model="search"
-          label="Buscar por nome"
-          variant="outlined"
-          density="compact"
-          prepend-inner-icon="mdi-magnify"
-          rounded="lg"
-          clearable
-          style="max-width: 260px"
-        />
-        <v-text-field
-          v-model="filterGP"
-          label="Filtrar por GP"
-          variant="outlined"
-          density="compact"
-          prepend-inner-icon="mdi-account-group"
-          rounded="lg"
-          clearable
-          style="max-width: 260px"
-        />
-        <v-select
-          v-model="filterEmailSent"
-          label="Email"
-          :items="emailFilterOptions"
-          item-title="label"
-          item-value="value"
-          variant="outlined"
-          density="compact"
-          rounded="lg"
-          style="max-width: 180px"
-        />
+        <v-text-field v-model="search" label="Buscar por nome" variant="outlined" density="compact"
+          prepend-inner-icon="mdi-magnify" rounded="lg" clearable style="max-width: 260px" />
+
+        <v-text-field v-model="filterGP" label="Filtrar por GP" variant="outlined" density="compact"
+          prepend-inner-icon="mdi-account-group" rounded="lg" clearable style="max-width: 260px" />
+
+        <!-- NOVO FILTRO -->
+        <v-checkbox v-model="filterWithoutAI" label="Somente sem análise IA" density="compact" />
       </div>
     </v-card>
 
-    <!-- Tabela -->
-    <v-alert
-      v-if="error"
-      type="error"
-      variant="tonal"
-      rounded="xl"
-      class="mb-4"
-    >
+    <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
       {{ error }}
       <template #append>
         <v-btn variant="text" color="error" @click="loadRows">Tentar novamente</v-btn>
@@ -66,52 +26,46 @@
     </v-alert>
 
     <v-card rounded="xl" elevation="2">
-      <v-data-table
-        :headers="headers"
-        :items="filteredRows"
-        :loading="loading"
-        item-value="id"
-        class="rounded-xl"
-        :items-per-page="25"
-      >
+      <v-data-table :headers="headers" :items="filteredRows" :loading="loading" item-value="id" class="rounded-xl"
+        :items-per-page="25">
+
+
+        <template #item.status="{ item }">
+          <div class="d-flex align-center ga-3">
+
+            <!-- EMAIL -->
+            <v-tooltip text="Email enviado">
+              <template #activator="{ props }">
+                <v-icon v-bind="props" size="20" class="status-icon" :class="{ active: item.email_sent }">
+                  mdi-email-outline
+                </v-icon>
+              </template>
+            </v-tooltip>
+
+            <!-- ANÁLISE IA -->
+            <v-tooltip text="Análise gerada">
+              <template #activator="{ props }">
+                <v-icon v-bind="props" size="20" class="status-icon" :class="{ active: item.ai_analysis }">
+                  mdi-file-document-outline
+                </v-icon>
+              </template>
+            </v-tooltip>
+
+          </div>
+        </template>
         <template #item.name="{ item }">
-          <span
-            class="text-primary font-weight-medium cursor-pointer"
-            @click="goToResult(item.id)"
-            style="cursor: pointer"
-          >
+          <span class="text-primary font-weight-medium" @click="goToResult(item.id)" style="cursor: pointer">
             {{ item.name }}
           </span>
         </template>
 
+        <!-- DATA + HORA -->
         <template #item.created_at="{ item }">
-          {{ formatDate(item.created_at) }}
+          {{ formatDateTime(item.created_at) }}
         </template>
 
         <template #item.top_gift="{ item }">
           {{ topGift(item.scores) }}
-        </template>
-
-        <template #item.ai_analysis="{ item }">
-          <v-chip :color="item.ai_analysis ? 'success' : 'warning'" size="small" variant="tonal">
-            {{ item.ai_analysis ? 'Gerado' : 'Pendente' }}
-          </v-chip>
-        </template>
-
-        <template #item.email_sent="{ item }">
-          <v-chip :color="item.email_sent ? 'success' : 'grey'" size="small" variant="tonal">
-            {{ item.email_sent ? 'Enviado' : 'Não enviado' }}
-          </v-chip>
-        </template>
-
-        <template #item.actions="{ item }">
-          <v-btn
-            icon="mdi-eye"
-            variant="text"
-            size="small"
-            color="primary"
-            @click="goToResult(item.id)"
-          />
         </template>
       </v-data-table>
     </v-card>
@@ -121,45 +75,45 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-const router = useRouter()
-function goToResult(id) {
-  router.push({ name: 'results', params: { id } })
-}
 import { supabase } from '../services/supabase.js'
 import { runSupabaseQuery } from '../services/supabaseQuery.js'
 import { rankGifts } from '../services/scoring.js'
 
+const router = useRouter()
+
 const loading = ref(true)
-const exporting = ref(false)
 const error = ref(null)
 const rows = ref([])
+
 const search = ref('')
 const filterGP = ref('')
-const filterEmailSent = ref(null)
+const filterWithoutAI = ref(false)
 
-const emailFilterOptions = [
-  { label: 'Todos', value: null },
-  { label: 'Enviado', value: true },
-  { label: 'Não enviado', value: false },
-]
+function goToResult(id) {
+  router.push({ name: 'results', params: { id } })
+}
 
 const headers = [
+  { title: '', key: 'status', sortable: false, width: 70 },
   { title: 'Nome', key: 'name', sortable: true },
   { title: 'GP', key: 'gp', sortable: true },
   { title: 'Idade', key: 'age', sortable: true, width: 80 },
   { title: 'Data', key: 'created_at', sortable: true },
   { title: 'Dom principal', key: 'top_gift', sortable: false },
-  { title: 'Análise IA', key: 'ai_analysis', sortable: false, width: 130 },
-  { title: 'Email', key: 'email_sent', sortable: false, width: 130 },
-  { title: '', key: 'actions', sortable: false, width: 60 },
 ]
 
 const filteredRows = computed(() => {
   return rows.value.filter((r) => {
-    const matchSearch = !search.value || r.name?.toLowerCase().includes(search.value.toLowerCase())
-    const matchGP = !filterGP.value || r.gp?.toLowerCase().includes(filterGP.value.toLowerCase())
-    const matchEmail = filterEmailSent.value === null || r.email_sent === filterEmailSent.value
-    return matchSearch && matchGP && matchEmail
+    const matchSearch =
+      !search.value || r.name?.toLowerCase().includes(search.value.toLowerCase())
+
+    const matchGP =
+      !filterGP.value || r.gp?.toLowerCase().includes(filterGP.value.toLowerCase())
+
+    const matchAI =
+      !filterWithoutAI.value || !r.ai_analysis
+
+    return matchSearch && matchGP && matchAI
   })
 })
 
@@ -173,64 +127,33 @@ async function loadRows() {
     const { data, error: fetchError } = await runSupabaseQuery(
       supabase
         .from('responses')
-        .select('id, name, email, gp, age, created_at, scores, ai_analysis, email_sent')
+        .select('id, name, gp, age, created_at, scores, ai_analysis, email_sent')
         .order('created_at', { ascending: false })
     )
 
     if (fetchError) throw fetchError
     rows.value = data ?? []
   } catch (err) {
-    console.error('Erro ao carregar painel admin:', err)
-    error.value = 'Não foi possível carregar o painel admin. Tente novamente.'
+    console.error(err)
+    error.value = 'Erro ao carregar painel admin'
   } finally {
     loading.value = false
   }
 }
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit', month: '2-digit', year: '2-digit',
+function formatDateTime(iso) {
+  return new Date(iso).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 }
 
 function topGift(scores) {
   if (!scores) return '—'
   return rankGifts(scores)[0]?.gift.name ?? '—'
-}
-
-function csvCell(value) {
-  return `"${String(value ?? '').replaceAll('"', '""')}"`
-}
-
-function exportCSV() {
-  exporting.value = true
-
-  const cols = ['nome', 'email', 'gp', 'idade', 'data', 'dom_principal', 'ia_gerado', 'email_enviado', 'id']
-  const csvRows = [cols.join(',')]
-
-  for (const r of filteredRows.value) {
-    const row = [
-      csvCell(r.name),
-      csvCell(r.email),
-      csvCell(r.gp),
-      r.age ?? '',
-      formatDate(r.created_at),
-      csvCell(topGift(r.scores)),
-      r.ai_analysis ? 'sim' : 'não',
-      r.email_sent ? 'sim' : 'não',
-      r.id,
-    ]
-    csvRows.push(row.join(','))
-  }
-
-  const blob = new Blob([`\ufeff${csvRows.join('\r\n')}`], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `dons-espirituais-${new Date().toISOString().slice(0, 10)}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
-  exporting.value = false
 }
 </script>
 
@@ -239,7 +162,23 @@ function exportCSV() {
 .v-card {
   transition: all 0.2s ease;
 }
+
 .v-card:hover {
   transform: translateY(-2px);
+}
+
+.status-icon {
+  cursor: help;
+  transition: all 0.15s ease;
+  opacity: 0.55;
+}
+
+.status-icon:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.status-icon.active {
+  opacity: 1;
 }
 </style>
