@@ -79,18 +79,15 @@
           <div class="d-flex align-center ga-3">
 
             <!-- EMAIL -->
-            <v-tooltip text="Email enviado">
-              <template #activator="{ props }">
-                <v-icon v-bind="props" size="20" class="status-icon" :class="{ active: item.email_sent }">
-                  mdi-email-outline
-                </v-icon>
-              </template>
-            </v-tooltip>
+            <v-icon size="20" class="status-icon" :class="{ active: item.email_sent }">
+              mdi-email-outline
+            </v-icon>
 
-            <!-- ANÁLISE IA -->
-            <v-tooltip text="Análise gerada">
+            <!-- RESULTADO -->
+            <v-tooltip text="Abrir resultado">
               <template #activator="{ props }">
-                <v-icon v-bind="props" size="20" class="status-icon" :class="{ active: item.ai_analysis }">
+                <v-icon v-bind="props" size="20" class="status-icon clickable" :class="{ active: item.ai_analysis }"
+                  @click.stop="goToResult(item.id)">
                   mdi-file-document-outline
                 </v-icon>
               </template>
@@ -98,13 +95,32 @@
 
           </div>
         </template>
+
+        <!-- Nome -->
         <template #item.name="{ item }">
-          <span class="text-primary font-weight-medium" @click="goToResult(item.id)" style="cursor: pointer">
+
+          <v-text-field v-if="editingName === item.id" v-model="item.name" density="compact" variant="underlined"
+            hide-details autofocus @blur="saveName(item)" @keyup.enter="saveName(item)" />
+
+          <span v-else class="text-primary font-weight-medium" style="cursor:pointer" @click="editingName = item.id">
             {{ item.name }}
           </span>
+
         </template>
 
-        <!-- DATA + HORA -->
+        <!-- GP -->
+        <template #item.gp="{ item }">
+
+          <v-text-field v-if="editingGP === item.id" v-model="item.gp" density="compact" variant="underlined"
+            hide-details autofocus @blur="saveGP(item)" @keyup.enter="saveGP(item)" />
+
+          <span v-else style="cursor:pointer" @click="editingGP = item.id">
+            {{ item.gp }}
+          </span>
+
+        </template>
+
+        <!-- Data e Hora -->
         <template #item.created_at="{ item }">
           {{ formatDateTime(item.created_at) }}
         </template>
@@ -130,8 +146,44 @@ const search = ref('')
 const filterGP = ref('')
 const filterWithoutAI = ref(false)
 
+const editingName = ref(null)
+const editingGP = ref(null)
+
 function goToResult(id) {
   router.push({ name: 'results', params: { id } })
+}
+
+async function updateField(id, field, value) {
+  try {
+    const { error } = await runSupabaseQuery(
+      supabase
+        .from('responses')
+        .update({
+          [field]: value?.trim(),
+        })
+        .eq('id', id)
+    )
+
+    if (error) throw error
+  } catch (err) {
+    console.error(`Erro ao atualizar ${field}:`, err)
+  }
+}
+
+async function saveName(item) {
+  item.name = item.name?.trim()
+
+  await updateField(item.id, 'name', item.name)
+
+  editingName.value = null
+}
+
+async function saveGP(item) {
+  item.gp = item.gp?.trim()
+
+  await updateField(item.id, 'gp', item.gp)
+
+  editingGP.value = null
 }
 
 const total = computed(() => rows.value.length)
@@ -228,7 +280,7 @@ function formatDateTime(iso) {
 }
 
 .status-icon {
-  cursor: help;
+  cursor: default;
   transition: all 0.15s ease;
   color: #9e9e9e;
 }
@@ -240,4 +292,9 @@ function formatDateTime(iso) {
 .status-icon.active {
   color: rgb(var(--v-theme-primary));
 }
+
+.clickable {
+  cursor: pointer;
+}
+
 </style>
