@@ -18,6 +18,39 @@
       </div>
     </v-card>
 
+    <!-- DASHBOARD -->
+    <div class="mb-4 w-100">
+
+      <div class="d-flex align-center ga-2 stat">
+
+        <div class="d-flex align-center ga-2">
+          <v-icon size="18" color="primary">mdi-counter</v-icon>
+          <span class="text-caption">Total:</span>
+          <strong>{{ total }}</strong>
+    </div>
+
+    <div class="d-flex align-center ga-2">
+      <v-icon size="18" color="primary">mdi-calendar-today</v-icon>
+      <span class="text-caption">Hoje:</span>
+      <strong>{{ totalToday }}</strong>
+    </div>
+
+    <div class="d-flex align-center ga-2">
+      <v-icon size="18" color="primary">mdi-calendar-week</v-icon>
+      <span class="text-caption">Semana:</span>
+      <strong>{{ totalWeek }}</strong>
+    </div>
+
+    <div class="d-flex align-center ga-2">
+      <v-icon size="18" color="grey-darken-1">mdi-file-document-alert</v-icon>
+      <span class="text-caption">Sem análise:</span>
+      <strong>{{ totalWithoutAI }}</strong>
+    </div>
+
+  </div>
+
+</div>
+
     <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
       {{ error }}
       <template #append>
@@ -92,6 +125,30 @@ const filterWithoutAI = ref(false)
 function goToResult(id) {
   router.push({ name: 'results', params: { id } })
 }
+
+const total = computed(() => rows.value.length)
+
+const totalToday = computed(() => {
+  const today = new Date().toDateString()
+
+  return rows.value.filter(r =>
+    new Date(r.created_at).toDateString() === today
+  ).length
+})
+
+const totalWeek = computed(() => {
+  const now = new Date()
+  const weekStart = new Date()
+  weekStart.setDate(now.getDate() - now.getDay())
+
+  return rows.value.filter(r =>
+    new Date(r.created_at) >= weekStart
+  ).length
+})
+
+const totalWithoutAI = computed(() =>
+  rows.value.filter(r => !r.ai_analysis).length
+)
 
 const headers = [
   { title: '', key: 'status', sortable: false, width: 70 },
@@ -180,5 +237,8 @@ function topGift(scores) {
 
 .status-icon.active {
   opacity: 1;
+}
+.stat {
+  min-width: 140px;
 }
 </style>
