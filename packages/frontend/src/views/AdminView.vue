@@ -19,37 +19,49 @@
     </v-card>
 
     <!-- DASHBOARD -->
-    <div class="mb-4 w-100">
+    <v-row class="mb-4">
 
-      <div class="d-flex align-center ga-2 stat">
-
+      <v-col cols="6" sm="3">
         <div class="d-flex align-center ga-2">
-          <v-icon size="18" color="primary">mdi-counter</v-icon>
+          <v-icon size="18" color="primary">
+            mdi-calendar-today
+          </v-icon>
+          <span class="text-caption">Hoje:</span>
+          <strong>{{ totalToday }}</strong>
+        </div>
+      </v-col>
+
+      <v-col cols="6" sm="3">
+        <div class="d-flex align-center ga-2">
+          <v-icon size="18" color="primary">
+            mdi-calendar-week
+          </v-icon>
+          <span class="text-caption">Semana:</span>
+          <strong>{{ totalWeek }}</strong>
+        </div>
+      </v-col>
+
+      <v-col cols="6" sm="3">
+        <div class="d-flex align-center ga-2">
+          <v-icon size="18" color="primary">
+            mdi-counter
+          </v-icon>
           <span class="text-caption">Total:</span>
           <strong>{{ total }}</strong>
-    </div>
+        </div>
+      </v-col>
 
-    <div class="d-flex align-center ga-2">
-      <v-icon size="18" color="primary">mdi-calendar-today</v-icon>
-      <span class="text-caption">Hoje:</span>
-      <strong>{{ totalToday }}</strong>
-    </div>
+      <v-col cols="6" sm="3">
+        <div class="d-flex align-center ga-2">
+          <v-icon size="18" color="warning">
+            mdi-file-document-alert-outline
+          </v-icon>
+          <span class="text-caption">Sem análise:</span>
+          <strong>{{ totalWithoutAI }}</strong>
+        </div>
+      </v-col>
 
-    <div class="d-flex align-center ga-2">
-      <v-icon size="18" color="primary">mdi-calendar-week</v-icon>
-      <span class="text-caption">Semana:</span>
-      <strong>{{ totalWeek }}</strong>
-    </div>
-
-    <div class="d-flex align-center ga-2">
-      <v-icon size="18" color="grey-darken-1">mdi-file-document-alert</v-icon>
-      <span class="text-caption">Sem análise:</span>
-      <strong>{{ totalWithoutAI }}</strong>
-    </div>
-
-  </div>
-
-</div>
+    </v-row>
 
     <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
       {{ error }}
@@ -97,9 +109,6 @@
           {{ formatDateTime(item.created_at) }}
         </template>
 
-        <template #item.top_gift="{ item }">
-          {{ topGift(item.scores) }}
-        </template>
       </v-data-table>
     </v-card>
   </v-container>
@@ -110,7 +119,6 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../services/supabase.js'
 import { runSupabaseQuery } from '../services/supabaseQuery.js'
-import { rankGifts } from '../services/scoring.js'
 
 const router = useRouter()
 
@@ -156,7 +164,6 @@ const headers = [
   { title: 'GP', key: 'gp', sortable: true },
   { title: 'Idade', key: 'age', sortable: true, width: 80 },
   { title: 'Data', key: 'created_at', sortable: true },
-  { title: 'Dom principal', key: 'top_gift', sortable: false },
 ]
 
 const filteredRows = computed(() => {
@@ -208,10 +215,6 @@ function formatDateTime(iso) {
   })
 }
 
-function topGift(scores) {
-  if (!scores) return '—'
-  return rankGifts(scores)[0]?.gift.name ?? '—'
-}
 </script>
 
 
@@ -227,18 +230,14 @@ function topGift(scores) {
 .status-icon {
   cursor: help;
   transition: all 0.15s ease;
-  opacity: 0.55;
+  color: #9e9e9e;
 }
 
 .status-icon:hover {
-  opacity: 1;
   transform: scale(1.15);
 }
 
 .status-icon.active {
-  opacity: 1;
-}
-.stat {
-  min-width: 140px;
+  color: rgb(var(--v-theme-primary));
 }
 </style>
