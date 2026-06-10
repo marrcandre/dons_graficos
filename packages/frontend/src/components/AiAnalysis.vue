@@ -4,15 +4,24 @@
     <div class="d-flex align-center justify-space-between mb-4">
 
       <div>
-        <h2 class="text-h6 font-weight-bold text-primary mb-0"> 
+        <h2 class="text-h6 font-weight-bold text-primary mb-0">
           Análise dos seus dons
         </h2>
       </div>
 
-      <v-tooltip v-if="authStore.isAdmin" text="Atualizar análise">
+      <v-tooltip
+        v-if="authStore.isAdmin || !text"
+        text="Gerar análise"
+      >
         <template #activator="{ props }">
-          <v-btn icon="mdi-refresh" variant="text" color="primary" v-bind="props" :loading="generating"
-            @click="generateAnalysis(true)" />
+          <v-btn
+            icon="mdi-refresh"
+            variant="text"
+            color="primary"
+            v-bind="props"
+            :loading="generating"
+            @click="generateAnalysis(true)"
+          />
         </template>
       </v-tooltip>
 
@@ -20,7 +29,12 @@
 
     <!-- Carregando -->
     <div v-if="loading" class="text-center py-6">
-      <v-progress-circular indeterminate color="primary" size="40" class="mb-3" />
+      <v-progress-circular
+        indeterminate
+        color="primary"
+        size="40"
+        class="mb-3"
+      />
 
       <p class="text-body-2 text-medium-emphasis mt-2">
         Preparando a análise...
@@ -28,18 +42,50 @@
     </div>
 
     <!-- Análise disponível -->
-    <div v-else-if="text" class="text-body-2" style="line-height: 1.9; white-space: pre-wrap">
+    <div
+      v-else-if="text"
+      class="text-body-2"
+      style="line-height: 1.9; white-space: pre-wrap"
+    >
       {{ text }}
     </div>
 
     <!-- Erro -->
-    <v-alert v-else-if="error" type="error" variant="tonal" rounded="lg" class="text-body-2">
-      Não foi possível gerar a análise neste momento. Por favor, tente novamente mais tarde.  
+    <v-alert
+      v-else-if="error"
+      type="warning"
+      variant="tonal"
+      rounded="lg"
+      class="text-body-2"
+    >
+      Não foi possível gerar sua análise agora.
+
+      <br /><br />
+
+      Você pode tentar novamente em alguns instantes usando o botão acima.
+
+      <br /><br />
+
+      Caso a análise ainda não esteja disponível, ela será gerada automaticamente assim que possível.
     </v-alert>
 
     <!-- Sem análise -->
-    <v-alert v-else type="info" variant="tonal" rounded="lg" class="text-body-2">
-      A análise ainda está sendo preparada.
+    <v-alert
+      v-else
+      type="info"
+      variant="tonal"
+      rounded="lg"
+      class="text-body-2"
+    >
+      Sua análise ainda não está disponível.
+
+      <br /><br />
+
+      Em alguns momentos a geração pode levar um pouco mais de tempo.
+
+      <br /><br />
+
+      Você pode tentar gerar a análise usando o botão acima ou voltar mais tarde.
 
       <br /><br />
 
