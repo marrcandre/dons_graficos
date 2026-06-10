@@ -34,7 +34,7 @@
 
     <!-- Erro -->
     <v-alert v-else-if="error" type="error" variant="tonal" rounded="lg" class="text-body-2">
-      Não foi possível carregar a análise neste momento.
+      Não foi possível gerar a análise neste momento. Por favor, tente novamente mais tarde.  
     </v-alert>
 
     <!-- Sem análise -->
