@@ -14,7 +14,7 @@
           prepend-inner-icon="mdi-account-group" rounded="lg" clearable style="max-width: 260px" />
 
         <!-- NOVO FILTRO -->
-        <v-checkbox v-model="filterWithoutAI" label="Somente sem análise IA" density="compact" />
+        <v-checkbox v-model="filterWithoutAI" label="Sem análise" density="compact" />
       </div>
     </v-card>
 
@@ -214,8 +214,8 @@ const headers = [
   { title: '', key: 'status', sortable: false, width: 70 },
   { title: 'Nome', key: 'name', sortable: true },
   { title: 'GP', key: 'gp', sortable: true },
-  { title: 'Idade', key: 'age', sortable: true, width: 80 },
-  { title: 'Data', key: 'created_at', sortable: true },
+  { title: 'Respondido em', key: 'created_at', sortable: true },
+  { title: 'Idade', key: 'age', sortable: true, width: 40 },
 ]
 
 const filteredRows = computed(() => {
