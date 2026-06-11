@@ -18,25 +18,26 @@
     </v-dialog>
 
     <!-- Etapa 1: Dados do usuário -->
-    <UserInfoForm
-      v-if="step === 'userInfo'"
-      @submit="handleUserInfoSubmit"
-    />
+    <UserInfoForm v-if="step === 'userInfo'" @submit="handleUserInfoSubmit" />
 
     <!-- Etapa 2: Teste -->
     <template v-else-if="step === 'quiz'">
-      <QuizProgress :progress="quizStore.progress" :current="quizStore.currentIndex + 1" :total="quizStore.totalQuestions" />
-      <QuestionStep
-        v-if="quizStore.currentQuestion"
-        :question="quizStore.currentQuestion"
-        :model-value="quizStore.answers[quizStore.currentQuestionId]"
-        @update:model-value="handleAnswer"
-        @next="handleNext"
-        @prev="handlePrev"
-        :is-first="quizStore.currentIndex === 0"
-        :is-last="quizStore.currentIndex === quizStore.totalQuestions - 1"
-      />
+
+      <div v-if="authStore.isAdmin" class="d-flex justify-end mb-2">
+        <v-btn color="warning" variant="outlined" size="small" prepend-icon="mdi-lightning-bolt" @click="finishTestNow">
+          Finalizar teste
+        </v-btn>
+      </div>
+
+      <QuizProgress :progress="quizStore.progress" :current="quizStore.currentIndex + 1"
+        :total="quizStore.totalQuestions" />
+
+      <QuestionStep v-if="quizStore.currentQuestion" :question="quizStore.currentQuestion"
+        :model-value="quizStore.answers[quizStore.currentQuestionId]" @update:model-value="handleAnswer"
+        @next="handleNext" @prev="handlePrev" :is-first="quizStore.currentIndex === 0"
+        :is-last="quizStore.currentIndex === quizStore.totalQuestions - 1" />
     </template>
+
 
     <!-- Etapa 3: Enviando -->
     <div v-else-if="step === 'submitting'" class="text-center py-16">
@@ -134,6 +135,19 @@ async function handleNext() {
   await submitQuiz()
 }
 
+async function finishTestNow() {
+  for (let i = 0; i < quizStore.totalQuestions; i++) {
+    if (quizStore.answers[i] === undefined) {
+      quizStore.setAnswer(
+        i,
+        Math.floor(Math.random() * 6)
+      )
+    }
+  }
+
+  await submitQuiz()
+}
+
 async function submitQuiz() {
   step.value = 'submitting'
 
@@ -163,7 +177,15 @@ async function submitQuiz() {
 
     quizStore.clearState()
 
-    // Disparar análise IA de forma assíncrona (não bloquear redirect)
+    supabase.functions
+      .invoke('notify-admin', { body: { responseId: data.id } })
+      .then(({ error }) => {
+        if (error) console.error('Erro ao enviar notificação:', error)
+      })
+      .catch((err) => {
+        console.error('Erro ao enviar notificação:', err)
+      })
+
     supabase.functions
       .invoke('generate-ai', { body: { responseId: data.id } })
       .then(({ error }) => {
@@ -187,6 +209,7 @@ async function submitQuiz() {
 .v-card {
   transition: all 0.2s ease;
 }
+
 .v-card:hover {
   transform: translateY(-2px);
 }

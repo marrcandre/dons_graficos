@@ -218,7 +218,6 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
   const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-  const notifyUrl = `${supabaseUrl}/functions/v1/notify-admin`;
 
   if (!geminiApiKey) {
     return jsonResponse({ error: "GEMINI_API_KEY não configurada" }, 500);
@@ -281,28 +280,6 @@ Deno.serve(async (req) => {
 
   if (updateError) {
     return jsonResponse({ error: "Erro ao salvar análise" }, 500);
-  }
-
-  // 🔔 NOTIFY ADMIN (best effort, não bloqueia fluxo)
-  try {
-    console.log("Chamando notify-admin...");
-
-    const notifyRes = await fetch(notifyUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: supabaseServiceRoleKey,
-        Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      },
-      body: JSON.stringify({ responseId }),
-    });
-
-    const text = await notifyRes.text();
-
-    console.log("notify-admin status:", notifyRes.status);
-    console.log("notify-admin response:", text);
-  } catch (err) {
-    console.error("Erro notify-admin (não crítico):", err);
   }
 
   return jsonResponse({ success: true, model: usedModel });
