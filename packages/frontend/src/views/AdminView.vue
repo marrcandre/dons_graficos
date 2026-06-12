@@ -7,27 +7,11 @@
     <!-- Filtros -->
     <v-card rounded="xl" elevation="2" class="pa-4 mb-4">
       <div class="d-flex gap-3 flex-wrap">
-        <v-text-field
-          v-model="search"
-          label="Buscar por nome"
-          variant="outlined"
-          density="compact"
-          prepend-inner-icon="mdi-magnify"
-          rounded="lg"
-          clearable
-          style="max-width: 260px"
-        />
+        <v-text-field v-model="search" label="Buscar por nome" variant="outlined" density="compact"
+          prepend-inner-icon="mdi-magnify" rounded="lg" clearable style="max-width: 260px" />
 
-        <v-text-field
-          v-model="filterGP"
-          label="Filtrar por GP"
-          variant="outlined"
-          density="compact"
-          prepend-inner-icon="mdi-account-group"
-          rounded="lg"
-          clearable
-          style="max-width: 260px"
-        />
+        <v-text-field v-model="filterGP" label="Filtrar por GP" variant="outlined" density="compact"
+          prepend-inner-icon="mdi-account-group" rounded="lg" clearable style="max-width: 260px" />
 
         <!-- NOVO FILTRO -->
         <v-checkbox v-model="filterWithoutAI" label="Sem análise" density="compact" />
@@ -77,14 +61,8 @@
     </v-alert>
 
     <v-card rounded="xl" elevation="2">
-      <v-data-table
-        :headers="headers"
-        :items="filteredRows"
-        :loading="loading"
-        item-value="id"
-        class="rounded-xl"
-        :items-per-page="25"
-      >
+      <v-data-table :headers="headers" :items="filteredRows" :loading="loading" item-value="id" class="rounded-xl"
+        :items-per-page="25">
         <template #item.status="{ item }">
           <div class="d-flex align-center ga-3">
             <!-- EMAIL -->
@@ -95,13 +73,8 @@
             <!-- RESULTADO -->
             <v-tooltip text="Abrir resultado">
               <template #activator="{ props }">
-                <v-icon
-                  v-bind="props"
-                  size="20"
-                  class="status-icon clickable"
-                  :class="{ active: item.ai_analysis }"
-                  @click.stop="goToResult(item.id)"
-                >
+                <v-icon v-bind="props" size="20" class="status-icon clickable" :class="{ active: item.ai_analysis }"
+                  @click.stop="goToResult(item.id)">
                   mdi-file-document-outline
                 </v-icon>
               </template>
@@ -111,45 +84,23 @@
 
         <!-- Nome -->
         <template #item.name="{ item }">
-          <v-text-field
-            v-if="editingName === item.id"
-            v-model="item.name"
-            density="compact"
-            variant="underlined"
-            hide-details
-            autofocus
-            @blur="saveName(item)"
-            @keyup.enter="saveName(item)"
-          />
+          <v-text-field v-if="editingName === item.id" v-model="item.name" density="compact" variant="underlined"
+            hide-details autofocus @blur="saveName(item)" @keyup.enter="saveName(item)" />
 
-          <span
-            v-else
-            class="text-primary font-weight-medium"
-            style="cursor: pointer"
-            @click="editingName = item.id"
-          >
+          <span class="hover-text" v-else style="cursor: pointer" @click="editingName = item.id">
             {{ item.name }}
           </span>
         </template>
 
         <!-- GP -->
         <template #item.gp="{ item }">
-          <v-text-field
-            v-if="editingGP === item.id"
-            v-model="item.gp"
-            density="compact"
-            variant="underlined"
-            hide-details
-            autofocus
-            @blur="saveGP(item)"
-            @keyup.enter="saveGP(item)"
-          />
+          <v-text-field v-if="editingGP === item.id" v-model="item.gp" density="compact" variant="underlined"
+            hide-details autofocus @blur="saveGP(item)" @keyup.enter="saveGP(item)" />
 
-          <span v-else style="cursor: pointer" @click="editingGP = item.id">
+          <span class="hover-text" v-else style="cursor: pointer" @click="editingGP = item.id">
             {{ item.gp }}
           </span>
         </template>
-
         <!-- Data e Hora -->
         <template #item.created_at="{ item }">
           {{ formatDateTime(item.created_at) }}
@@ -315,5 +266,9 @@ function formatDateTime(iso) {
 
 .clickable {
   cursor: pointer;
+}
+
+.hover-text:hover {
+  color: rgb(var(--v-theme-primary));
 }
 </style>
