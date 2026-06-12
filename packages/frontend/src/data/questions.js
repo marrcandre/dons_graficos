@@ -2,7 +2,7 @@
 // Cada pergunta[i] mede o dom gifts[i % 27]
 // Escala de resposta: 0 = Raramente/Nunca, 1 = Às vezes, 2 = Frequentemente, 3 = Muito frequentemente
 
-export const questions_v2 = [
+export const questions = [
   { id: 0, text: "Tenho o desejo de transmitir mensagens que acredito receber de Deus para fortalecer, encorajar ou consolar outras pessoas." },
   { id: 1, text: "Gosto de caminhar com um grupo de pessoas por bastante tempo, participando de suas alegrias e dificuldades." },
   { id: 2, text: "Pessoas já me disseram que tenho ajudado outras a aprender verdades bíblicas de forma significativa." },
