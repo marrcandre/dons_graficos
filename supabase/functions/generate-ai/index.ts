@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const GIFTS_ORDER = [
   "Profecia",
-  "Pastor",
+  "Pastoreio",
   "Ensino",
   "Sabedoria",
   "Conhecimento",
@@ -11,23 +11,23 @@ const GIFTS_ORDER = [
   "Contribuição",
   "Socorro",
   "Misericórdia",
-  "Missionário",
+  "Evangelismo Transcultural",
   "Evangelista",
   "Hospitalidade",
-  "Dom da Fé",
+  "Fé",
   "Liderança",
   "Administração",
-  "Operação de Milagres",
-  "Dons de Cura",
+  "Milagres",
+  "Cura",
   "Línguas",
   "Interpretação de Línguas",
-  "Pobreza Voluntária",
+  "Simplicidade Voluntária",
   "Celibato",
   "Intercessão",
   "Libertação",
   "Serviço",
   "Apóstolo",
-  "Liderança de Adoração",
+  "Liderança em Adoração",
 ];
 
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
