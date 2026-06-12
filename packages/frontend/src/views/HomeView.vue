@@ -15,20 +15,28 @@
 
     </div>
 
+    <!-- Aviso de atualização -->
+    <v-alert type="warning" variant="tonal" class="mb-6" density="comfortable">
+      <div class="text-body-2">
+        <strong>Atualização recente:</strong><br />
+
+        Revisamos todas as perguntas do teste de dons espirituais para deixá-las mais claras e fiéis ao
+         original em inglês.<br /><br />
+
+        Se você já realizou o teste anteriormente, recomendamos refazê-lo para obter um resultado mais preciso.
+      </div>
+    </v-alert>
+
     <!-- Histórico -->
     <v-card v-if="hasHistory" rounded="xl" class="mb-6 pa-5 d-flex align-center justify-space-between" elevation="2">
       <div>
-<div class="d-flex align-center mb-4">
-  <v-icon
-    icon="mdi-history"
-    color="primary"
-    class="mr-2"
-  />
+        <div class="d-flex align-center mb-4">
+          <v-icon icon="mdi-history" color="primary" class="mr-2" />
 
-  <p class="text-h6 font-weight-bold text-primary mb-2">
-    Histórico de resultados
-  </p>
-</div>
+          <p class="text-h6 font-weight-bold text-primary mb-2">
+            Histórico de resultados
+          </p>
+        </div>
 
         <p class="text-body-2 text-medium-emphasis mb-2">
           Veja seus resultados e análises anteriores.
@@ -42,17 +50,13 @@
 
     <!-- Sobre o teste -->
     <v-card rounded="xl" class="mb-6 pa-5" elevation="2">
-<div class="d-flex align-center mb-4">
-  <v-icon
-    icon="mdi-information-outline"
-    color="primary"
-    class="mr-2"
-  />
+      <div class="d-flex align-center mb-4">
+        <v-icon icon="mdi-information-outline" color="primary" class="mr-2" />
 
-  <p class="text-h6 font-weight-bold text-primary mb-2">
-    Sobre o teste
-  </p>
-</div>
+        <p class="text-h6 font-weight-bold text-primary mb-2">
+          Sobre o teste
+        </p>
+      </div>
 
       <p class="text-body-1 mb-4">
         Este teste é baseado no modelo de
@@ -71,17 +75,13 @@
 
     <!-- Preparação -->
     <v-card rounded="xl" class="mb-6 pa-5" elevation="2">
-<div class="d-flex align-center mb-4">
-  <v-icon
-    icon="mdi-lightbulb-outline"
-    color="primary"
-    class="mr-2"
-  />
+      <div class="d-flex align-center mb-4">
+        <v-icon icon="mdi-lightbulb-outline" color="primary" class="mr-2" />
 
-  <p class="text-h6 font-weight-bold text-primary mb-2">
-    Preparação para o teste
-  </p>
-</div>
+        <p class="text-h6 font-weight-bold text-primary mb-2">
+          Preparação para o teste
+        </p>
+      </div>
 
       <p class="text-h6 font-weight-medium mb-4">
         Como responder
@@ -157,6 +157,7 @@ const reflectionQuestions = [
 .v-card {
   transition: all 0.2s ease;
 }
+
 .v-card:hover {
   transform: translateY(-2px);
 }
