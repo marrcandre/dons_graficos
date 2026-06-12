@@ -127,6 +127,29 @@ LEFT JOIN users u
 ORDER BY r.created_at DESC;
 ```
 
+## 6. Remover usuário e associação com respostas, sem remover as respostas (caso queira manter os dados, mas desvincular do usuário):
+
+```sql
+DELETE FROM public.users
+WHERE email = 'marco.mendes@ifc.edu.br';
+
+DELETE FROM auth.users
+WHERE email = 'marco.mendes@ifc.edu.br';
+
+UPDATE responses
+SET user_id = NULL
+WHERE LOWER(email) = LOWER('marco.mendes@ifc.edu.br');
+
+SELECT COUNT(*)
+FROM responses
+WHERE LOWER(email) = LOWER('marco.mendes@ifc.edu.br');
+
+SELECT *
+FROM responses
+WHERE user_id is NULL AND
+    LOWER(email) = LOWER('marco.mendes@ifc.edu.br');
+```
+
 ---
 
 ## 📌 Observações importantes
